@@ -236,37 +236,37 @@ void ShaderProgram::SendUniform(const std::string &name, float scalar)
 void ShaderProgram::SendUniform(const std::string &name, const vec2 &vector)
 {
 	GLint location = GetUniformLocation(name);
-	glUniform2f(location, vector.x,vector.y);
+	glUniform2f(location, vector[0],vector[1]);
 }
 
 void ShaderProgram::SendUniform(const std::string &name, const vec3 &vector)
 {
 	GLint location = GetUniformLocation(name);
-	glUniform3f(location, vector.x, vector.y, vector.z);
+	glUniform3f(location, vector[0], vector[1], vector[2]);
 }
 
 void ShaderProgram::SendUniform(const std::string &name, const vec4 &vector)
 {
 	GLint location = GetUniformLocation(name);
-	glUniform4f(location, vector.x, vector.y, vector.z, vector.w);
+	glUniform4f(location, vector[0], vector[1], vector[2], vector[3]);
 }
 
 void ShaderProgram::SendUniformArray(const std::string& name, const vec4* vector, unsigned size)
 {
 	GLint location = GetUniformLocation(name);
-	glUniform4fv(location, size, &vector[0].x);
+	glUniform4fv(location, size, &vector[0][0]);
 }
 
 void ShaderProgram::SendUniformArray(const std::string& name, const vec3* vector, unsigned size)
 {
 	GLint location = GetUniformLocation(name);
-	glUniform3fv(location, size, &vector[0].x);
+	glUniform3fv(location, size, &vector[0][0]);
 }
 
 void ShaderProgram::SendUniformArray(const std::string& name, const vec2* vector, unsigned size)
 {
 	GLint location = GetUniformLocation(name);
-	glUniform2fv(location, size, &vector[0].x);
+	glUniform2fv(location, size, &vector[0][0]);
 }
 
 void ShaderProgram::SendUniformMat3(const std::string &name, float *matrix, bool transpose)

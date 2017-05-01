@@ -6,15 +6,15 @@
 Game::Game()
 : GBuffer(5), DefferedComposite(1), ShadowMap(0), WorkBuffer1(1), WorkBuffer2(1)
 {
-	LightPositions[0] = vec3(10.0f, 10.0f, 10.0f);
-	LightPositions[1] = vec3(10.0f, -10.0f, -10.0f);
-	LightPositions[2] = vec3(-10.0f, -10.0f, 10.0f);
-	LightPositions[3] = vec3(-10.0f, 10.0f, -10.0f);
+	LightPositions[0] = vec3({ 10.0f, 10.0f, 10.0f });
+	LightPositions[1] = vec3({10.0f, -10.0f, -10.0f});
+	LightPositions[2] = vec3({-10.0f, -10.0f, 10.0f});
+	LightPositions[3] = vec3({-10.0f, 10.0f, -10.0f});
 
-	LightColors[0] = vec3(300, 300, 300);
-	LightColors[1] = vec3(300, 300, 300);
-	LightColors[2] = vec3(300, 300, 300);
-	LightColors[3] = vec3(300, 300, 300);
+	LightColors[0] = vec3({300, 300, 300});
+	LightColors[1] = vec3({300, 300, 300});
+	LightColors[2] = vec3({300, 300, 300});
+	LightColors[3] = vec3({300, 300, 300});
 
 }
 
@@ -220,9 +220,9 @@ void Game::initializeGame()
 		exit(0);
 	}
 
-
-	CameraProjection.FrustumProjection(60.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
-	ShadowProjection.OrthoProjection(35.0f, -35.0f, -35.0f, 35.0f, -10.0f, 100.0f);
+	GMath::SetFrustumProjection(CameraProjection, 60.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
+	//CameraProjection.FrustumProjection(60.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
+	//ShadowProjection.OrthoProjection(35.0f, -35.0f, -35.0f, 35.0f, -10.0f, 100.0f);
 
 	//MonkeyTransform.RotateX(90.0f);
 }
@@ -235,23 +235,28 @@ void Game::update()
 	float deltaTime = updateTimer->getElapsedTimeSeconds();
 	TotalGameTime += deltaTime;
 
-	CameraTransform.LoadIdentity();
-	CameraTransform.RotateY(TotalGameTime * 10.f);
-	CameraTransform.Translate(0.0f, 7.5f, 20.0f);
-	CameraTransform.RotateX(-15.0f);
+	GMath::SetIdentity(CameraTransform);
+	GMath::RotateY(CameraTransform, TotalGameTime * 10.0f);
+	GMath::SetTranslate(CameraTransform, vec3({ 0.0f, 7.5f, 20.0f }));
+	GMath::RotateX(CameraTransform, -15.0f);
 
-	ShadowTransform.LoadIdentity();
-	ShadowTransform.RotateY(TotalGameTime * -2.5f);
-	ShadowTransform.Translate(0.0f, 7.5f, 20.0f);
-	ShadowTransform.RotateX(-15.0f);
+	//CameraTransform.LoadIdentity();
+	//CameraTransform.RotateY(TotalGameTime * 10.f);
+	//CameraTransform.Translate(0.0f, 7.5f, 20.0f);
+	//CameraTransform.RotateX(-15.0f);
 
-	mat4 bias = mat4(0.5f, 0.0f, 0.0f, 0.5f,
-					0.0f, 0.5f, 0.0f, 0.5f,
-					0.0f, 0.0f, 0.5f, 0.5f,
-					0.0f, 0.0f, 0.0f, 1.0f);
+	//ShadowTransform.LoadIdentity();
+	//ShadowTransform.RotateY(TotalGameTime * -2.5f);
+	//ShadowTransform.Translate(0.0f, 7.5f, 20.0f);
+	//ShadowTransform.RotateX(-15.0f);
 
-	ViewToShadowMap.LoadIdentity();
-	ViewToShadowMap = bias * ShadowProjection * ShadowTransform.GetInverse() * CameraTransform;
+	//mat4 bias = mat4(0.5f, 0.0f, 0.0f, 0.5f,
+	//				0.0f, 0.5f, 0.0f, 0.5f,
+	//				0.0f, 0.0f, 0.5f, 0.5f,
+	//				0.0f, 0.0f, 0.0f, 1.0f);
+
+	//ViewToShadowMap.LoadIdentity();
+	//ViewToShadowMap = bias * ShadowProjection * ShadowTransform.GetInverse() * CameraTransform;
 
 
 
@@ -259,7 +264,7 @@ void Game::update()
 
 void Game::draw()
 {
-	vec4 camPos(0,0,0,1);
+	vec4 camPos({ 0,0,0,1 });
 	camPos = CameraTransform * camPos;
 
 
@@ -308,9 +313,9 @@ void Game::draw()
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	GBufferPass.Bind();
-	GBufferPass.SendUniformMat4("uModel", mat4::Identity().data, true);
-	GBufferPass.SendUniformMat4("uView", CameraTransform.GetInverse().data, true);
-	GBufferPass.SendUniformMat4("uProj", CameraProjection.data, true);
+	GBufferPass.SendUniformMat4("uModel", GMath::GetMat4Identity().GetData(), false);
+	GBufferPass.SendUniformMat4("uView", GMath::GetInverse(CameraTransform).GetData(), false);
+	GBufferPass.SendUniformMat4("uProj", CameraProjection.GetData(), false);
 
 
 	GBufferPass.SendUniform("Albedo", 2);
@@ -403,7 +408,7 @@ void Game::draw()
 	DefferedLighting.SendUniform("metallicMap", 4);
 
 	//DefferedLighting.SendUniform("aoMap", 5);
-	DefferedLighting.SendUniform("camPos", vec3(camPos.x, camPos.y, camPos.z));
+	DefferedLighting.SendUniform("camPos", vec3({ camPos[0], camPos[1], camPos[2] }));
 	DefferedLighting.SendUniformArray("lightPositions", LightPositions, 4);
 	DefferedLighting.SendUniformArray("lightColors", LightColors, 4);
 
@@ -535,12 +540,12 @@ void Game::keyboardDown(unsigned char key, int mouseX, int mouseY)
 		break;
 
 	case '3':
-		LightPositions[0].x += 0.01f;
-		std::cout <<"\n pos: "<< LightPositions[0].x;
+		LightPositions[0][0] += 0.01f;
+		std::cout <<"\n pos: "<< LightPositions[0][0];
 		break;
 
 	case '4':
-		LightPositions[0].x -= 0.01f;
+		LightPositions[0][0] -= 0.01f;
 		break;
 
 	case 27: // the escape key

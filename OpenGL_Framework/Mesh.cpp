@@ -2,7 +2,7 @@
 #include "Mesh.h"
 #include <fstream>
 #include <iostream>
-#include <Math\Core.h>
+#include <GMath/MathLibrary.h>
 
 #define CHAR_BUFFER_SIZE 128
 #define BUFFER_OFFSET(i) ((char *)0 + (i))
@@ -93,19 +93,19 @@ bool Mesh::LoadFromFile(const std::string &file)
 		else if (std::strstr(inputString, "vt") != nullptr)
 		{
 			vec2 temp;
-			std::sscanf(inputString, "vt %f %f", &temp.x, &temp.y);
+			std::sscanf(inputString, "vt %f %f", &temp[0], &temp[1]);
 			textureData.push_back(temp);
 		}
 		else if (std::strstr(inputString, "vn") != nullptr)
 		{
 			vec3 temp;
-			std::sscanf(inputString, "vn %f %f %f", &temp.x, &temp.y, &temp.z);
+			std::sscanf(inputString, "vn %f %f %f", &temp[0], &temp[1], &temp[2]);
 			normalData.push_back(temp);
 		}
 		else if (std::strstr(inputString, "v") != nullptr)
 		{
 			vec3 temp;
-			std::sscanf(inputString, "v %f %f %f", &temp.x, &temp.y, &temp.z);
+			std::sscanf(inputString, "v %f %f %f", &temp[0], &temp[1], &temp[2]);
 			vertexData.push_back(temp);
 		}
 		else if (std::strstr(inputString, "f") != nullptr)
@@ -126,16 +126,16 @@ bool Mesh::LoadFromFile(const std::string &file)
 	{
 		for (unsigned j = 0; j < 3; j++)
 		{
-			unPackedVertexData.push_back(vertexData[faceData[i].verticies[j] - 1].x);
-			unPackedVertexData.push_back(vertexData[faceData[i].verticies[j] - 1].y);
-			unPackedVertexData.push_back(vertexData[faceData[i].verticies[j] - 1].z);
+			unPackedVertexData.push_back(vertexData[faceData[i].verticies[j] - 1][0]);
+			unPackedVertexData.push_back(vertexData[faceData[i].verticies[j] - 1][1]);
+			unPackedVertexData.push_back(vertexData[faceData[i].verticies[j] - 1][2]);
 
-			unPackedTextureData.push_back(textureData[faceData[i].textureUVs[j] - 1].x);
-			unPackedTextureData.push_back(textureData[faceData[i].textureUVs[j] - 1].y);
+			unPackedTextureData.push_back(textureData[faceData[i].textureUVs[j] - 1][0]);
+			unPackedTextureData.push_back(textureData[faceData[i].textureUVs[j] - 1][1]);
 
-			unPackedNormalData.push_back(normalData[faceData[i].normals[j] - 1].x);
-			unPackedNormalData.push_back(normalData[faceData[i].normals[j] - 1].y);
-			unPackedNormalData.push_back(normalData[faceData[i].normals[j] - 1].z);
+			unPackedNormalData.push_back(normalData[faceData[i].normals[j] - 1][0]);
+			unPackedNormalData.push_back(normalData[faceData[i].normals[j] - 1][1]);
+			unPackedNormalData.push_back(normalData[faceData[i].normals[j] - 1][2]);
 		}
 	}
 

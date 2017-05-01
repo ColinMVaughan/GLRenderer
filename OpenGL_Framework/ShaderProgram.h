@@ -1,11 +1,17 @@
 #pragma once
 #include "GL\glew.h"
 
-#include <Math\Core.h>
+#include <GMath/MathLibrary.h>
 #include <string>
 
 class ShaderProgram
 {
+
+public:
+	typedef GMath::vec2f vec2;
+	typedef GMath::vec3f vec3;
+	typedef GMath::vec4f vec4;
+
 public:
 	ShaderProgram();
 	~ShaderProgram();

@@ -1,5 +1,6 @@
 #pragma once
 #include <windows.h>
+#include <GMath/MathLibrary.h>
 
 #include "ShaderProgram.h"
 #include "Mesh.h"
@@ -23,6 +24,11 @@
 
 class Game
 {
+
+public:
+	typedef GMath::vec3f vec3;
+	typedef GMath::vec4f vec4;
+	typedef GMath::mat4f mat4;
 public:
 	Game();
 	~Game();
@@ -79,9 +85,9 @@ public:
 
 	mat4 CameraTransform;
 	mat4 CameraProjection;
-	mat4 ShadowTransform;
-	mat4 ShadowProjection;
-	mat4 ViewToShadowMap;
+	//mat4 ShadowTransform;
+	//mat4 ShadowProjection;
+	//mat4 ViewToShadowMap;
 
 	vec3 LightPositions[4];
 	vec3 LightColors[4];

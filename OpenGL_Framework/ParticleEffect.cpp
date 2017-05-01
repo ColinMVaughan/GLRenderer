@@ -99,16 +99,16 @@ void ParticleEffect::Update(float elapsed)
 		//We have more particles to generate this frame...
 		NumToSpawn > 0)
 	{
-		_Particles.Alpha[_NumCurrentParticles]		= LerpAlpha.x;
+		_Particles.Alpha[_NumCurrentParticles]		= LerpAlpha[0];
 		_Particles.Ages[_NumCurrentParticles]		= 0.0f;
-		_Particles.Lifetimes[_NumCurrentParticles]	= RandomRangef(RangeLifetime.x, RangeLifetime.y);
-		_Particles.Size[_NumCurrentParticles]		= LerpSize.x;
-		_Particles.Positions[_NumCurrentParticles].Set(RandomRangef(RangeX.x, RangeX.y), RandomRangef(RangeY.x, RangeY.y), RandomRangef(RangeZ.x, RangeZ.y));
+		_Particles.Lifetimes[_NumCurrentParticles]	= RandomRangef(RangeLifetime[0], RangeLifetime[1]);
+		_Particles.Size[_NumCurrentParticles]		= LerpSize[0];
+		_Particles.Positions[_NumCurrentParticles]  = vec3({ RandomRangef(RangeX[0], RangeX[1]), RandomRangef(RangeY[0], RangeY[1]), RandomRangef(RangeZ[0], RangeZ[1]) });
 
 		//send the particle in a random direction, with a velocity between our range
-		_Particles.Velocities[_NumCurrentParticles].Set(RandomRangef(-1.0f, 1.0f), RandomRangef(-1.0f, 1.0f), RandomRangef(-1.0f, 1.0f));
+		_Particles.Velocities[_NumCurrentParticles] = vec3({ RandomRangef(-1.0f, 1.0f), RandomRangef(-1.0f, 1.0f), RandomRangef(-1.0f, 1.0f) });
 		_Particles.Velocities[_NumCurrentParticles].Normalize();
-		_Particles.Velocities[_NumCurrentParticles] *= RandomRangef(RangeVelocity.x, RangeVelocity.y);
+		_Particles.Velocities[_NumCurrentParticles] *= RandomRangef(RangeVelocity[0], RangeVelocity[1]);
 
 		//counters...
 		_NumCurrentParticles++;
@@ -138,8 +138,8 @@ void ParticleEffect::Update(float elapsed)
 
 		float interp = _Particles.Ages[i] / _Particles.Lifetimes[i];
 		
-		_Particles.Alpha[i] = LERP(LerpAlpha.x, LerpAlpha.y, interp);
-		_Particles.Size[i]	= LERP(LerpSize.x, LerpSize.y, interp);
+		_Particles.Alpha[i] = GMath::LERP(LerpAlpha[0], LerpAlpha[1], interp);
+		_Particles.Size[i]	= GMath::LERP(LerpSize[0], LerpSize[1], interp);
 	}
 
 	//update OpenGL on the changes

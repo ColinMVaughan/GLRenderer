@@ -1,13 +1,13 @@
 #pragma once
 
 #include <vector>
-#include <Math\Core.h>
+#include <GMath/MathLibrary.h>
 #include "Texture.h"
 
 struct ParticleList
 {
-	vec3 *Positions = nullptr;
-	vec3 *Velocities = nullptr;
+	GMath::vec3f *Positions = nullptr;
+	GMath::vec3f *Velocities = nullptr;
 	float *Size = nullptr;
 	float *Alpha = nullptr;
 	float *Ages = nullptr;
@@ -16,6 +16,12 @@ struct ParticleList
 
 class ParticleEffect
 {
+
+public:
+	typedef GMath::mat4f mat4;
+	typedef GMath::vec3f vec3;
+	typedef GMath::vec2f vec2;
+
 public:
 	ParticleEffect();
 	~ParticleEffect();
@@ -27,14 +33,14 @@ public:
 
 	mat4 Transform;
 
-	vec2 RangeX = vec2(-10.0f, 10.0f);
-	vec2 RangeY = vec2(0.0f, 10.0f);
-	vec2 RangeZ = vec2(-10.0f, 10.0f);
-	vec2 RangeVelocity = vec2(0.1f, 1.0f);
-	vec2 RangeLifetime = vec2(7.0f, 9.5f);
+	vec2 RangeX = vec2({ -10.0f, 10.0f });
+	vec2 RangeY = vec2({ 0.0f, 10.0f });
+	vec2 RangeZ = vec2({ -10.0f, 10.0f });
+	vec2 RangeVelocity = vec2({ 0.1f, 1.0f });
+	vec2 RangeLifetime = vec2({ 7.0f, 9.5f });
 	//Lerp variables are dynamic based on lifetime of particle
-	vec2 LerpAlpha = vec2(0.5f, 0.0f);
-	vec2 LerpSize = vec2(0.0f, 1.0f);
+	vec2 LerpAlpha = vec2({ 0.5f, 0.0f });
+	vec2 LerpSize = vec2({ 0.0f, 1.0f });
 
 private:
 	ParticleList _Particles;
