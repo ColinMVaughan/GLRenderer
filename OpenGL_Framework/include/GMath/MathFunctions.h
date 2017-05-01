@@ -23,7 +23,6 @@ namespace GMath
 	void SetOrthographic(mat4f& matrix, float top, float bottom, float left, float right, float near, float far);
 
 	void SetRotate(mat4f& matrix, Quaternion rotation);
-	void SetTranslate(mat4f& matrix, vec3f position);
 	void Translate(mat4f& matrix, vec3f translate);
 
 	void SetScale(mat4f& matrix, vec3f scale);

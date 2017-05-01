@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "Utilities.h"
 
+
 //DEFFERED UPGRADE1
 
 Game::Game()
@@ -220,7 +221,8 @@ void Game::initializeGame()
 		exit(0);
 	}
 
-	GMath::SetFrustumProjection(CameraProjection, 60.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
+	CameraProjection = glm::perspective(60.0f, float(1200.0f / 720.0f), 1.0f, 10000.0f);
+	//GMath::SetFrustumProjection(CameraProjection, 60.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
 	//CameraProjection.FrustumProjection(60.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
 	//ShadowProjection.OrthoProjection(35.0f, -35.0f, -35.0f, 35.0f, -10.0f, 100.0f);
 
@@ -229,17 +231,29 @@ void Game::initializeGame()
 
 void Game::update()
 {
+
 	// update our clock so we have the delta time since the last update
 	updateTimer->tick();
 
 	float deltaTime = updateTimer->getElapsedTimeSeconds();
 	TotalGameTime += deltaTime;
 
-	GMath::SetIdentity(CameraTransform);
-	GMath::RotateY(CameraTransform, TotalGameTime * 10.0f);
-	GMath::SetTranslate(CameraTransform, vec3({ 0.0f, 7.5f, 20.0f }));
-	GMath::RotateX(CameraTransform, -15.0f);
+	CameraTransform = glm::mat4();
+	CameraTransform = glm::rotate(CameraTransform, float(TotalGameTime * 10.0f), glm::vec3(0, 1, 0));
+	glm::translate(CameraTransform, glm::vec3(0.0f, 7.5f, 20.0f));
+	glm::rotate(CameraTransform, 15.0f, glm::vec3(1, 0, 0));
+	//GMath::SetIdentity(CameraTransform);
+	//GMath::RotateY(CameraTransform, TotalGameTime * 10.0f);
+	//GMath::Translate(CameraTransform, vec3({ 0.0f, -7.5f, -20.0f }));
+	//GMath::RotateX(CameraTransform, 15.0f);
 
+	
+	
+	
+	
+	
+	
+	
 	//CameraTransform.LoadIdentity();
 	//CameraTransform.RotateY(TotalGameTime * 10.f);
 	//CameraTransform.Translate(0.0f, 7.5f, 20.0f);
@@ -265,7 +279,7 @@ void Game::update()
 void Game::draw()
 {
 	vec4 camPos({ 0,0,0,1 });
-	camPos = CameraTransform * camPos;
+	//camPos = CameraTransform * camPos;
 
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -312,10 +326,11 @@ void Game::draw()
 ////////////-Geometry-/////////////////
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
+
 	GBufferPass.Bind();
 	GBufferPass.SendUniformMat4("uModel", GMath::GetMat4Identity().GetData(), false);
-	GBufferPass.SendUniformMat4("uView", GMath::GetInverse(CameraTransform).GetData(), false);
-	GBufferPass.SendUniformMat4("uProj", CameraProjection.GetData(), false);
+	GBufferPass.SendUniformMat4("uView", &CameraTransform[0][0], false);
+	GBufferPass.SendUniformMat4("uProj", &CameraProjection[0][0], false);
 
 
 	GBufferPass.SendUniform("Albedo", 2);
