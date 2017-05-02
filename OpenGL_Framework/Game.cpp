@@ -221,8 +221,8 @@ void Game::initializeGame()
 		exit(0);
 	}
 
-	CameraProjection = glm::perspective(60.0f, float(1200.0f / 720.0f), 1.0f, 10000.0f);
-	//GMath::SetFrustumProjection(CameraProjection, 60.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
+	//CameraProjection = glm::perspective(45.0f, float(1200.0f / 720.0f), 1.0f, 10000.0f);
+	GMath::SetFrustumProjection(CameraProjection, 45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
 	//CameraProjection.FrustumProjection(60.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
 	//ShadowProjection.OrthoProjection(35.0f, -35.0f, -35.0f, 35.0f, -10.0f, 100.0f);
 
@@ -239,9 +239,10 @@ void Game::update()
 	TotalGameTime += deltaTime;
 
 	CameraTransform = glm::mat4();
-	CameraTransform = glm::rotate(CameraTransform, float(TotalGameTime * 10.0f), glm::vec3(0, 1, 0));
-	glm::translate(CameraTransform, glm::vec3(0.0f, 7.5f, 20.0f));
-	glm::rotate(CameraTransform, 15.0f, glm::vec3(1, 0, 0));
+	CameraTransform = glm::rotate(CameraTransform, float(TotalGameTime * 1.0f), glm::vec3(0, 1, 0));
+	CameraTransform = glm::translate(CameraTransform, glm::vec3(0.0f, 7.5f, 19.0f));
+	CameraTransform = glm::rotate(CameraTransform, -0.15f, glm::vec3(1, 0, 0));
+
 	//GMath::SetIdentity(CameraTransform);
 	//GMath::RotateY(CameraTransform, TotalGameTime * 10.0f);
 	//GMath::Translate(CameraTransform, vec3({ 0.0f, -7.5f, -20.0f }));
@@ -278,8 +279,8 @@ void Game::update()
 
 void Game::draw()
 {
-	vec4 camPos({ 0,0,0,1 });
-	//camPos = CameraTransform * camPos;
+	glm::vec4 camPos({ 0,0,0,1 });
+	camPos = CameraTransform * camPos;
 
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -325,12 +326,12 @@ void Game::draw()
 
 ////////////-Geometry-/////////////////
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-
+	CameraTransform = glm::inverse(CameraTransform);
 
 	GBufferPass.Bind();
-	GBufferPass.SendUniformMat4("uModel", GMath::GetMat4Identity().GetData(), false);
+	GBufferPass.SendUniformMat4("uModel",&glm::mat4()[0][0], false);
 	GBufferPass.SendUniformMat4("uView", &CameraTransform[0][0], false);
-	GBufferPass.SendUniformMat4("uProj", &CameraProjection[0][0], false);
+	GBufferPass.SendUniformMat4("uProj", CameraProjection.GetData(), false);
 
 
 	GBufferPass.SendUniform("Albedo", 2);
