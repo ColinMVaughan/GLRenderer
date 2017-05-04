@@ -85,7 +85,7 @@ public:
 
 	FrameBuffer ShadowMap;
 
-	glm::mat4 CameraTransform;
+	mat4 CameraTransform;
 	mat4 CameraProjection;
 	//mat4 ShadowTransform;
 	//mat4 ShadowProjection;

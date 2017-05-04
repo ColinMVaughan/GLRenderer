@@ -1,7 +1,6 @@
 #include "Game.h"
 #include "Utilities.h"
 
-
 //DEFFERED UPGRADE1
 
 Game::Game()
@@ -238,15 +237,15 @@ void Game::update()
 	float deltaTime = updateTimer->getElapsedTimeSeconds();
 	TotalGameTime += deltaTime;
 
-	CameraTransform = glm::mat4();
-	CameraTransform = glm::rotate(CameraTransform, float(TotalGameTime * 1.0f), glm::vec3(0, 1, 0));
-	CameraTransform = glm::translate(CameraTransform, glm::vec3(0.0f, 7.5f, 19.0f));
-	CameraTransform = glm::rotate(CameraTransform, -0.15f, glm::vec3(1, 0, 0));
+	//CameraTransform = glm::mat4();
+	//CameraTransform = glm::rotate(CameraTransform, float(TotalGameTime * 1.0f), glm::vec3(0, 1, 0));
+	//CameraTransform = glm::translate(CameraTransform, glm::vec3(0.0f, 7.5f, 19.0f));
+	//CameraTransform = glm::rotate(CameraTransform, -0.15f, glm::vec3(1, 0, 0));
 
-	//GMath::SetIdentity(CameraTransform);
-	//GMath::RotateY(CameraTransform, TotalGameTime * 10.0f);
-	//GMath::Translate(CameraTransform, vec3({ 0.0f, -7.5f, -20.0f }));
-	//GMath::RotateX(CameraTransform, 15.0f);
+	GMath::SetIdentity(CameraTransform);
+	GMath::RotateY(CameraTransform, TotalGameTime * 1.0f);
+	GMath::Translate(CameraTransform, vec3({ 0.0f, -7.5f, -20.0f }));
+	GMath::RotateX(CameraTransform, 0.15f);
 
 	
 	
@@ -279,7 +278,7 @@ void Game::update()
 
 void Game::draw()
 {
-	glm::vec4 camPos({ 0,0,0,1 });
+	vec4 camPos({ 0,0,0,1 });
 	camPos = CameraTransform * camPos;
 
 
@@ -326,11 +325,10 @@ void Game::draw()
 
 ////////////-Geometry-/////////////////
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	CameraTransform = glm::inverse(CameraTransform);
 
 	GBufferPass.Bind();
 	GBufferPass.SendUniformMat4("uModel",&glm::mat4()[0][0], false);
-	GBufferPass.SendUniformMat4("uView", &CameraTransform[0][0], false);
+	GBufferPass.SendUniformMat4("uView", CameraTransform.GetData(), false);
 	GBufferPass.SendUniformMat4("uProj", CameraProjection.GetData(), false);
 
 
