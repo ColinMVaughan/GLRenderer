@@ -26,7 +26,8 @@ class Renderer
 public:
 	Renderer(unsigned windowHeight, unsigned windowWidth, GMath::mat4f* cameraTransform, GMath::mat4f* cameraProjection)
 		:m_WindowWidth(windowWidth), m_WindowHeight(windowHeight), 
-		m_CameraTransform(cameraTransform), m_CameraProjection(cameraProjection){}
+		m_CameraTransform(cameraTransform), m_CameraProjection(cameraProjection),
+		GBuffer(5), DefferedComposite(1){}
 
 	void Initalize();
 	void AddMesh(Mesh* mesh, Material* material);
