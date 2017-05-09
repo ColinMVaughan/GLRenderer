@@ -3,6 +3,12 @@
 #include "Timer.h"
 #include "Game.h"
 
+
+//---------------------------------------------------
+// Purpose: Initalizes the Renderer's default shaders and framebuffers
+//
+// TODO: Allow for user submitted shaders
+//---------------------------------------------------
 void Renderer::Initalize()
 {
 	m_UpdateTimer = new Timer();
@@ -60,24 +66,48 @@ void Renderer::Initalize()
 
 }
 
+//---------------------------------------------------
+// Purpose: Adds mesh to be rendered to the scene with material
+// Params: -Pointer to mesh class, -Pointer to material class
+//
+// TODO: Actually add directional Light
+//---------------------------------------------------
 void Renderer::AddMesh(Mesh* mesh, Material* material)
 {
 	MeshList.push_back(mesh);
 	MaterialList.push_back(material);
 }
 
+//---------------------------------------------------
+// Purpose: Adds point light to the scene
+// Params: -colour of the light, -direction vector of the light, -if the light casts shadows
+//
+// TODO: Add safegaurds
+//---------------------------------------------------
 void Renderer::AddPointLight(GMath::vec3f lightColor, GMath::vec3f lightpPosition, bool castsShadows)
 {
 	m_PointLightPositions.push_back(lightpPosition);
 	m_PointLightColors.push_back(lightColor);
 }
 
-//TODO: Actually add directional Light
+
+//---------------------------------------------------
+// Purpose: Adds Directional light to the scene
+// Params: -colour of the light, -direction vector of the light, -if the light casts shadows
+//
+// TODO: Actually add directional Light
+//---------------------------------------------------
 void Renderer::AddDirectionalLight(GMath::vec3f lightColor, GMath::vec3f lightDirection, bool castsShadows)
 {
 
 }
 
+
+
+//---------------------------------
+// Purpose: Renders the scene with the current list of renderables & default shaders
+//
+//---------------------------------
 void Renderer::Render()
 {
 
@@ -179,4 +209,5 @@ void Renderer::Render()
 
 	DefferedComposite.MoveToBackBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
 	glutSwapBuffers();
+	//------------------------------------------------------------------------------
 }
