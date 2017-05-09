@@ -10,6 +10,8 @@ public:
 
 	bool Load(const std::string &file);
 	bool LoadHDR(const std::string &file);
+	
+	bool CreateCubeMap();
 	void Unload();
 
 	void Bind();

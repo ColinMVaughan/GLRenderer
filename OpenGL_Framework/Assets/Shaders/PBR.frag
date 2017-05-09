@@ -76,6 +76,10 @@ void main()
 	vec3 normal			= texture(normalMap, texcoord).rgb;
 	vec3 position		= texture(positionMap, texcoord).rgb;
 	
+	if(length(position)==0)
+	{
+		discard;
+	}
 	
 	float metallic		= texture(metallicMap, texcoord).r;
 	float roughness		= texture(roughnessMap,texcoord).r;
