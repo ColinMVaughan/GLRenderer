@@ -235,7 +235,8 @@ void Game::initializeGame()
 	//ShadowProjection.OrthoProjection(35.0f, -35.0f, -35.0f, 35.0f, -10.0f, 100.0f);
 
 	//MonkeyTransform.RotateX(90.0f);
-	cubeMap = ConvertEQtoCube("./Assets/Textures/GCanyon_C_YumaPoint_Env.hdr");
+	cubeMap = ConvertEQtoCube("./Assets/Textures/GCanyon_C_YumaPoint_3k.hdr");
+
 
 }
 
@@ -258,11 +259,6 @@ void Game::update()
 	//GMath::Translate(CameraTransform, vec3({ 0.0f, 7.5f, 20.0f }));
 	//GMath::RotateX(CameraTransform, 0.15f);
 
-	
-	
-	
-	
-	
 	
 	
 	//CameraTransform.LoadIdentity();
@@ -307,11 +303,9 @@ GLuint Game::ConvertEQtoCube(std::string filePath)
 	ShaderProgram eqConvertShader;
 	eqConvertShader.Load("./Assets/Shaders/EQ_to_Cube.vert", "./Assets/Shaders/EQ_to_Cube.frag");
 
-	Texture HDR_map;
-	HDR_map.LoadHDR(filePath);
 
-	Texture CubeMap;
-	CubeMap.CreateCubeMap();
+	TexHouse.LoadHDR(filePath);
+	TexSword.CreateCubeMap();
 
 	glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 	glm::mat4 captureViews[] =
@@ -331,21 +325,21 @@ GLuint Game::ConvertEQtoCube(std::string filePath)
 	eqConvertShader.SendUniformMat4("projection", &captureProjection[0][0], false);
 
 	glActiveTexture(GL_TEXTURE0);
-	HDR_map.Bind();
+	TexHouse.Bind();
 
 	glViewport(0, 0, 512, 512);
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	for(int i=0; i<6; ++i)
 	{
 		eqConvertShader.SendUniformMat4("view", &captureViews[i][0][0], false);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, CubeMap.TexObj, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, TexSword.TexObj, 0);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		DrawCube();
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	HDR_map.UnBind();
+	TexHouse.UnBind();
 	eqConvertShader.UnBind();
 
 	return captureFBO;
@@ -494,16 +488,16 @@ void Game::draw()
 //-------------------------------------------------------------------------------------------
 	DefferedComposite.Bind();
 	StaticGeometry.Bind();
-
-
-	StaticGeometry.SendUniformMat4("uView", &glm::inverse(CameraTransform)[0][0], false);
-	StaticGeometry.SendUniformMat4("uProj", CameraProjection.GetData(), false);
+	
+	
+	StaticGeometry.SendUniformMat4("view", &glm::inverse(CameraTransform)[0][0], false);
+	StaticGeometry.SendUniformMat4("projection", CameraProjection.GetData(), false);
 	StaticGeometry.SendUniform("environmentMap", 0);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
+	
+	glBindTexture(GL_TEXTURE_CUBE_MAP, TexSword.TexObj);
 	DrawCube();
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
+	
 	StaticGeometry.UnBind();
 	DefferedComposite.UnBind();
 //------------------------------------------------------------------------------------------

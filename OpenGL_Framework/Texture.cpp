@@ -44,13 +44,13 @@ bool Texture::LoadHDR(const std::string& file)
 
 	stbi_set_flip_vertically_on_load(true);
 	int width, height, nrComponents;
-	float * data = stbi_loadf(file.c_str(), &width, &height, &nrComponents, 0);
+	float* data = stbi_loadf(file.c_str(), &width, &height, &nrComponents, 0);
 	
 	if(data)
 	{
 		glGenTextures(1, &TexObj);
 		glBindTexture(GL_TEXTURE_2D, TexObj);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
