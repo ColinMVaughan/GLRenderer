@@ -75,10 +75,10 @@ public:
 	Texture Metallic;
 	Texture Roughness;
 
-	Texture TexStone;
-	Texture TexSword;
-	Texture TexGround;
-	Texture TexHouse;
+	Texture IrradianceMap;
+	Texture CubeMap;
+	Texture PrefilterMap;
+	Texture BRDFMap;
 
 	FrameBuffer GBuffer;
 	FrameBuffer DefferedComposite;

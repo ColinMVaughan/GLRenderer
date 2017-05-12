@@ -11,7 +11,7 @@ public:
 	bool Load(const std::string &file);
 	bool LoadHDR(const std::string &file);
 	
-	bool CreateCubeMap();
+	bool CreateCubeMap(GLsizei size, bool mipmap);
 	void Unload();
 
 	void Bind();
