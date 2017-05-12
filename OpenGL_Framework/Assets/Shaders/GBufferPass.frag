@@ -32,7 +32,7 @@ void main()
 	//Pack Normals
 		//in-> [-1,1]
 		//out->[0,1]
-	outNormals = norm * 0.5 + 0.5;
+	outNormals = normalize(norm); //* 0.5 + 0.5;
 
 	//viewSpace Positions
 	outPosition = pos;

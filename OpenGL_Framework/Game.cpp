@@ -176,7 +176,7 @@ void Game::initializeGame()
 	//
 	GBuffer.InitDepthTexture(WINDOW_WIDTH, WINDOW_HEIGHT);
 	GBuffer.InitColorTexture(0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);	//Flat Color  ///Might fuck things up!!!
-	GBuffer.InitColorTexture(1, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGB8, GL_NEAREST, GL_CLAMP_TO_EDGE);	//Normals (xyz)
+	GBuffer.InitColorTexture(1, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGB32F, GL_NEAREST, GL_CLAMP_TO_EDGE);	//Normals (xyz)
 	GBuffer.InitColorTexture(2, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGB32F, GL_NEAREST, GL_CLAMP_TO_EDGE);	//ViewSpace Positions (xyz)
 	GBuffer.InitColorTexture(3, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);	//Roughness Factor
 	GBuffer.InitColorTexture(4, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);	//Metallic Factor
@@ -235,7 +235,7 @@ void Game::initializeGame()
 	//ShadowProjection.OrthoProjection(35.0f, -35.0f, -35.0f, 35.0f, -10.0f, 100.0f);
 
 	//MonkeyTransform.RotateX(90.0f);
-	ConvertEQtoCube("./Assets/Textures/Mans_Outside_2k.hdr");
+	ConvertEQtoCube("./Assets/Textures/Tokyo_BigSight_3k.hdr");
 
 
 }
@@ -429,7 +429,7 @@ GLuint Game::ConvertEQtoCube(std::string filePath)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
@@ -442,9 +442,9 @@ GLuint Game::ConvertEQtoCube(std::string filePath)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	DrawFullScreenQuad();
 
-
 	brdfShader.UnBind();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	return captureFBO;
 }
 
@@ -454,6 +454,7 @@ void Game::draw()
 {
 	glm::vec4 camPos(0,0,0,1 );
 	camPos = CameraTransform * camPos;
+	
 
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

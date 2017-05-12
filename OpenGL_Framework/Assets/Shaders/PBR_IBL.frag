@@ -61,7 +61,7 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 	return ggx1 * ggx2;
 }
 
-vec3 fresnelSchlick(float cosTheta, vec3 F0, float roughness)
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
 	  return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
@@ -79,8 +79,8 @@ void main()
 	albedo.y = pow(albedo.y, 2.2);
 	albedo.z = pow(albedo.z, 2.2);
 	
-	vec3 normal			= texture(normalMap, texcoord).rgb;
-	vec3 position		= texture(positionMap, texcoord).rgb;
+	vec3 normal			= texture(normalMap, texcoord).xyz;
+	vec3 position		= texture(positionMap, texcoord).xyz;
 	
 	if(length(position)==0)
 	{
@@ -89,11 +89,11 @@ void main()
 	
 	float metallic		= texture(metallicMap, texcoord).r;
 	float roughness		= texture(roughnessMap,texcoord).r;
-	float ao			= 1.0;//texture(aoMap, texcoord).r;
+	float ao			= texture(aoMap, texcoord).r;
 	
 	
-	normal = normal * 2.0 - 1.0; //unpack normal.
-	vec3 N = normalize(normal);
+	normal = normal; //* 2.0 - 1.0; //unpack normal.
+	vec3 N = normal;//normalize(normal);
 	vec3 V = normalize(camPos - position);
 	vec3 R = reflect(-V,N);
 	
@@ -102,7 +102,7 @@ void main()
 	
 	//reflectance equaition
 	vec3 Lo = vec3(0.0);
-	for(int i=0; i< 4; ++i)
+	for(int i=0; i< 0; ++i)
 	{
 		//Calculate per-light radiance
 		vec3 L 			  = normalize(lightPositions[i] - position);
@@ -115,15 +115,17 @@ void main()
 		//cook-torrance brdf
 		float NDF	= DistributionGGX(N,H,roughness);
 		float G		= GeometrySmith(N,V,L,roughness);
-		vec3 F		= fresnelSchlick(max(dot(H,V),0.0), F0, roughness);
+		vec3 F		= fresnelSchlick(max(dot(H,V),0.0), F0);
+		
+		vec3 nominator		= NDF * G * F;
+		float denominator	= 4 * max(dot(N,V),0.0) * max(dot(N,L), 0.0) + 0.001; //add 0.001 to prevent divide by zero
+		vec3 specular		= nominator / denominator;
 		
 		vec3 kS = F;
 		vec3 kD = vec3(1.0) - kS;
 		kD *= 1.0 - metallic;
 		
-		vec3 nominator		= NDF * G * F;
-		float denominator	= 4 * max(dot(N,V),0.0) * max(dot(N,L), 0.0) + 0.001; //add 0.001 to prevent divide by zero
-		vec3 specular		= nominator / denominator;
+
 		
 		//add to outgoing radiance Lo
 		float NdotL = max(dot(N,L),0.0);
