@@ -39,10 +39,7 @@ public:
 	void initializeGame();
 	void update();
 	void draw();
-	void newDraw();
 
-
-	GLuint ConvertEQtoCube(std::string filePath);
 
 	/* input callback functions */
 	void keyboardDown(unsigned char key, int mouseX, int mouseY);
@@ -54,57 +51,12 @@ public:
 	Timer *updateTimer	= nullptr;
 	float TotalGameTime = 0.0f;
 
-	Renderer m_Renderer;
-
-	ShaderProgram StaticGeometry;
-	ShaderProgram BloomHighPass;
-	ShaderProgram BlurHorizontal;
-	ShaderProgram BlurVertical;
-	ShaderProgram BloomComposite;
-	ShaderProgram GBufferPass;
-	ShaderProgram DefferedLighting;
-	
-
-	Mesh Stone;
-	Mesh Sword;
-	Mesh Ground;
-	Mesh House;
 
 
-
-	Mesh Orb;
-	Texture Albedo;
-	Texture Metallic;
-	Texture Roughness;
-
-	Texture IrradianceMap;
-	Texture CubeMap;
-	Texture PrefilterMap;
-	Texture BRDFMap;
-
-	FrameBuffer GBuffer;
-	FrameBuffer DefferedComposite;
-	
-	FrameBuffer WorkBuffer1;
-	FrameBuffer WorkBuffer2;
-
-	FrameBuffer ShadowMap;
-
-	FrameBuffer CubePass;
-
-	Camera m_Camera;
-	Material GunMat;
-	//mat4 ShadowTransform;
-	//mat4 ShadowProjection;
-	//mat4 ViewToShadowMap;
-
-	vec3 LightPositions[4];
-	vec3 LightColors[4];
-
-	GLuint cubeMap;
 private:
 
-	bool Wireframe = false;
-	bool ShaderEffect = false;
-
+	Renderer m_Renderer;
+	Mesh Orb;
+	Camera m_Camera;
+	Material GunMat;
 };
