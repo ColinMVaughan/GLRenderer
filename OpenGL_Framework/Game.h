@@ -15,6 +15,7 @@
 #include <GL/glut.h>
 
 #include "Timer.h"
+#include "Renderer.h"
 
 #define WINDOW_WIDTH		1200
 #define WINDOW_HEIGHT		720
@@ -53,6 +54,7 @@ public:
 	Timer *updateTimer	= nullptr;
 	float TotalGameTime = 0.0f;
 
+	Renderer m_Renderer;
 
 	ShaderProgram StaticGeometry;
 	ShaderProgram BloomHighPass;
@@ -90,8 +92,8 @@ public:
 
 	FrameBuffer CubePass;
 
-	glm::mat4 CameraTransform;
-	mat4 CameraProjection;
+	Camera m_Camera;
+	Material GunMat;
 	//mat4 ShadowTransform;
 	//mat4 ShadowProjection;
 	//mat4 ViewToShadowMap;

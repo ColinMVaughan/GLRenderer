@@ -11,13 +11,14 @@
 //---------------------------------------------------
 void Renderer::Initalize()
 {
+
 	m_UpdateTimer = new Timer();
 	InitFullScreenQuad();
 
 	glEnable(GL_DEPTH_TEST);
 	//-----------------------------------------
 
-	if (!StaticGeometry.Load("./Assets/Shaders/StaticGeometry.vert", "./Assets/Shaders/GBufferPass.frag"))
+	if (!StaticGeometry.Load("./Assets/Shaders/CubeMap.vert", "./Assets/Shaders/CubeMap.frag"))
 	{
 		std::cout << "Shaders failed to initalize.\n";
 		system("pause");
@@ -33,7 +34,7 @@ void Renderer::Initalize()
 		exit(0);
 	}
 
-	if (!DefferedLighting.Load("./Assets/Shaders/PassThorugh.vert", "./Assets/Shaders/PBR.frag"))
+	if (!DefferedLighting.Load("./Assets/Shaders/PassThorugh.vert", "./Assets/Shaders/PBR_IBL.frag"))
 	{
 		std::cout << "Shaders failed to initalize.\n";
 		system("pause");
@@ -44,7 +45,7 @@ void Renderer::Initalize()
 	//-------------------------------------------------------------------------------------------------------------------------------------------------
 	GBuffer.InitDepthTexture(m_WindowWidth, m_WindowHeight);
 	GBuffer.InitColorTexture(0, m_WindowWidth, m_WindowHeight, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);	//Flat Color  ///Might fuck things up!!!
-	GBuffer.InitColorTexture(1, m_WindowWidth, m_WindowHeight, GL_RGB8, GL_NEAREST, GL_CLAMP_TO_EDGE);	//Normals (xyz)
+	GBuffer.InitColorTexture(1, m_WindowWidth, m_WindowHeight, GL_RGB32F, GL_NEAREST, GL_CLAMP_TO_EDGE);	//Normals (xyz)
 	GBuffer.InitColorTexture(2, m_WindowWidth, m_WindowHeight, GL_RGB32F, GL_NEAREST, GL_CLAMP_TO_EDGE);	//ViewSpace Positions (xyz)
 	GBuffer.InitColorTexture(3, m_WindowWidth, m_WindowHeight, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);	//Roughness Factor
 	GBuffer.InitColorTexture(4, m_WindowWidth, m_WindowHeight, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);	//Metallic Factor
@@ -64,6 +65,27 @@ void Renderer::Initalize()
 		exit(0);
 	}
 
+}
+
+//-----------------------------------------------------------
+// Purpose: Loads an HDR equairectangular map and converts it to a cube map.
+//			Then creates nessisary textures for IBL rendering.
+//
+// Params: -filepath to an HDR Equirectangular map.
+//------------------------------------------------------------
+void Renderer::InitalizePBREnvironmentMaps(std::string filepath)
+{
+	//Load & convert equarectangular environment map (HDR) to Cube Map
+	EnvironmentmapToCubemap(filepath, m_CubeMap);
+
+	//Generate diffuse irradiance map from the environment cube map
+	CubemapToIrradianceMap(m_CubeMap, m_IrradianceMap);
+
+	//Genrate prefilter map from cube map
+	CubemapToPrefiltermap(m_CubeMap, m_PrefilterMap);
+
+	//Calculate and generate a BRDF lookup texture
+	CalculateBRDF(m_BDRFMap);
 }
 
 //---------------------------------------------------
@@ -114,8 +136,6 @@ void Renderer::Render()
 	//--------------------------------------------------------
 	//			Get Ready for Render
 	//--------------------------------------------------------
-	GMath::vec4f camPos({ 0,0,0,1 });
-	camPos = *m_CameraTransform * camPos;
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 0);
@@ -131,8 +151,8 @@ void Renderer::Render()
 
 	GBufferPass.Bind();
 	GBufferPass.SendUniformMat4("uModel", &glm::mat4()[0][0], false);
-	GBufferPass.SendUniformMat4("uView", m_CameraTransform->GetData(), false);
-	GBufferPass.SendUniformMat4("uProj", m_CameraProjection->GetData(), false);
+	GBufferPass.SendUniformMat4("uView", &glm::inverse(m_Camera->m_Transform)[0][0], false);
+	GBufferPass.SendUniformMat4("uProj", m_Camera->m_Projection.GetData(), false);
 
 	GBufferPass.SendUniform("Albedo", 2);
 	GBufferPass.SendUniform("Roughness", 1);
@@ -164,6 +184,24 @@ void Renderer::Render()
 	GBufferPass.UnBind();
 	GBuffer.UnBind();
 
+	//-----------------------------------------------
+	//			Render Skybox
+	//----------------------------------------------
+	DefferedComposite.Bind();
+	StaticGeometry.Bind();
+
+
+	StaticGeometry.SendUniformMat4("view", &glm::inverse(m_Camera->m_Transform)[0][0], false);
+	StaticGeometry.SendUniformMat4("projection", m_Camera->m_Projection.GetData(), false);
+	StaticGeometry.SendUniform("environmentMap", 0);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_CubeMap.TexObj);
+	DrawCube();
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	StaticGeometry.UnBind();
+	DefferedComposite.UnBind();
+
 	//--------------------------------------------------------
 	//			Deffered Lighting Pass
 	//--------------------------------------------------------
@@ -177,8 +215,13 @@ void Renderer::Render()
 	DefferedLighting.SendUniform("roughnessMap", 3);
 	DefferedLighting.SendUniform("metallicMap", 4);
 
-	//DefferedLighting.SendUniform("aoMap", 5);
-	DefferedLighting.SendUniform("camPos", GMath::vec3f({ camPos[0], camPos[1], camPos[2] }));
+	DefferedLighting.SendUniform("irradianceMap", 5);
+	DefferedLighting.SendUniform("prefilterMap", 6);
+	DefferedLighting.SendUniform("brdfLUT", 7);
+
+
+	//DefferedLighting.SendUniform("aoMap", 8);
+	DefferedLighting.SendUniform("camPos", m_Camera->GetPosition());
 	DefferedLighting.SendUniformArray("lightPositions", m_PointLightPositions.data(), 4);
 	DefferedLighting.SendUniformArray("lightColors", m_PointLightColors.data(), 4);
 
@@ -193,7 +236,19 @@ void Renderer::Render()
 	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(3));
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(4));
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_IrradianceMap.TexObj);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_PrefilterMap.TexObj);
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, m_BDRFMap.TexObj);
 	DrawFullScreenQuad();
+	glBindTexture(GL_TEXTURE_2D, GL_NONE);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, GL_NONE);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, GL_NONE);
+	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, GL_NONE);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, GL_NONE);
@@ -207,7 +262,7 @@ void Renderer::Render()
 	DefferedComposite.UnBind();
 	DefferedLighting.UnBind();
 
-	DefferedComposite.MoveToBackBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
+	DefferedComposite.MoveToBackBuffer(m_WindowWidth, m_WindowHeight);
 	glutSwapBuffers();
 	//------------------------------------------------------------------------------
 }

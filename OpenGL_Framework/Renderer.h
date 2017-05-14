@@ -4,6 +4,7 @@
 #include "ShaderProgram.h"
 #include "Timer.h"
 #include "FrameBuffer.h"
+#include <glm/mat4x4.hpp>
 
 struct Material
 {
@@ -20,16 +21,37 @@ struct Material
 	static Texture defaultTex;
 };
 
+struct PointLight
+{
+	
+};
+
+class Camera
+{
+public:
+	GMath::vec3f GetPosition()
+	{
+		glm::vec4 pos(0,0,0,1);
+		pos = m_Transform * pos;
+
+		return GMath::vec3f({ pos[0], pos[1], pos[2] });
+	}
+
+
+	GMath::mat4f m_Projection;
+	glm::mat4 m_Transform;
+};
 
 class Renderer
 {
 public:
-	Renderer(unsigned windowHeight, unsigned windowWidth, GMath::mat4f* cameraTransform, GMath::mat4f* cameraProjection)
+	Renderer(unsigned windowHeight, unsigned windowWidth, Camera* camera)
 		:m_WindowWidth(windowWidth), m_WindowHeight(windowHeight), 
-		m_CameraTransform(cameraTransform), m_CameraProjection(cameraProjection),
+		m_Camera(camera),
 		GBuffer(5), DefferedComposite(1){}
 
 	void Initalize();
+	void InitalizePBREnvironmentMaps(std::string filepath);
 	void AddMesh(Mesh* mesh, Material* material);
 	void AddPointLight(GMath::vec3f lightColor, GMath::vec3f lightpPsition, bool castsShadows);
 	void AddDirectionalLight(GMath::vec3f lightColor, GMath::vec3f lightDirection, bool castsShadows);
@@ -39,8 +61,7 @@ private:
 	unsigned m_WindowWidth;
 	unsigned m_WindowHeight;
 
-	GMath::mat4f* m_CameraTransform;
-	GMath::mat4f* m_CameraProjection;
+	 Camera* m_Camera;
 
 	std::vector<Mesh*> MeshList;
 	std::vector<Material*> MaterialList;
@@ -50,17 +71,17 @@ private:
 
 	Timer* m_UpdateTimer;
 
-
 	FrameBuffer GBuffer;
 	FrameBuffer DefferedComposite;
 
 	//Shaders used for rendering
 	ShaderProgram StaticGeometry;
-	ShaderProgram BloomHighPass;
-	ShaderProgram BlurHorizontal;
-	ShaderProgram BlurVertical;
-	ShaderProgram BloomComposite;
 	ShaderProgram GBufferPass;
 	ShaderProgram DefferedLighting;
 	
+
+	Texture m_CubeMap;
+	Texture m_IrradianceMap;
+	Texture m_PrefilterMap;
+	Texture m_BDRFMap;
 };

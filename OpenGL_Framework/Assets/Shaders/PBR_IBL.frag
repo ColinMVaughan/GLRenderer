@@ -102,7 +102,7 @@ void main()
 	
 	//reflectance equaition
 	vec3 Lo = vec3(0.0);
-	for(int i=0; i< 0; ++i)
+	for(int i=0; i< 4; ++i)
 	{
 		//Calculate per-light radiance
 		vec3 L 			  = normalize(lightPositions[i] - position);

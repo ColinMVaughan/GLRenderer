@@ -4,17 +4,9 @@
 //DEFFERED UPGRADE1
 
 Game::Game()
-: GBuffer(5), DefferedComposite(1), ShadowMap(0), WorkBuffer1(1), WorkBuffer2(1), CubePass(1)
+: GBuffer(5), DefferedComposite(1), ShadowMap(0), WorkBuffer1(1), WorkBuffer2(1), CubePass(1), m_Renderer(WINDOW_HEIGHT,WINDOW_WIDTH, &m_Camera)
 {
-	LightPositions[0] = vec3({ 10.0f, 10.0f, 10.0f });
-	LightPositions[1] = vec3({10.0f, -10.0f, -10.0f});
-	LightPositions[2] = vec3({-10.0f, -10.0f, 10.0f});
-	LightPositions[3] = vec3({-10.0f, 10.0f, -10.0f});
 
-	LightColors[0] = vec3({300, 300, 300});
-	LightColors[1] = vec3({300, 300, 300});
-	LightColors[2] = vec3({300, 300, 300});
-	LightColors[3] = vec3({300, 300, 300});
 
 }
 
@@ -44,34 +36,47 @@ void Game::initializeGame()
 	InitFullScreenQuad();
 
 	glEnable(GL_DEPTH_TEST);
+	GMath::SetFrustumProjection(m_Camera.m_Projection, 45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
 
 
-	//Orb stuff for PBR test
+	//Orb stuff for PBR test & New Renderer Test
 //-----------------------------------------------------------------
-	if (!Orb.LoadFromFile("./Assets/Models/Orb.obj"))
+	if (!Orb.LoadFromFile("./Assets/Models/Gun.obj"))
 	{
 		std::cout << "Couldn't find the monkey.\n";
 		system("pause");
 		exit(0);
 	}
-	if (!Albedo.Load("./Assets/Textures/Rust/Albedo.png"))
+	if (!GunMat.Albedo.Load("./Assets/Textures/Rust/Albedo.png"))
 	{
 		system("pause");
 		exit(0);
 	}
-	if (!Metallic.Load("./Assets/Textures/Rust/Metallic1.png"))
+	if (!GunMat.Metallic.Load("./Assets/Textures/Rust/Metallic1.png"))
 	{
 		system("pause");
 		exit(0);
 	}
-	if (!Roughness.Load("./Assets/Textures/Rust/Roughness1.png"))
+	if (!GunMat.Roughness.Load("./Assets/Textures/Rust/Roughness1.png"))
 	{
 		system("pause");
 		exit(0);
 	}
+
+
+	m_Renderer.AddMesh(&Orb, &GunMat);
+	m_Renderer.InitalizePBREnvironmentMaps("./Assets/Textures/Tokyo_BigSight_3k.hdr");
+	m_Renderer.AddPointLight(vec3({ 300.0f, 300.0f, 300.0f }), vec3({ 10.0f, 10.0f, 10.0f }), false);
+	m_Renderer.AddPointLight(vec3({ 300.0f, 300.0f, 300.0f }), vec3({ 10.0f, -10.0f, -10.0f }), false);
+	m_Renderer.AddPointLight(vec3({ 300.0f, 300.0f, 300.0f }), vec3({ -10.0f, -10.0f, 10.0f }), false);
+	m_Renderer.AddPointLight(vec3({ 300.0f, 300.0f, 300.0f }), vec3({ -10.0f, 10.0f, -10.0f }), false);
+
+
+	return;
+
+
+
 //------------------------------------------------------------------
-
-
 
 	if (!StaticGeometry.Load("./Assets/Shaders/CubeMap.vert", "./Assets/Shaders/CubeMap.frag"))
 	{
@@ -230,7 +235,7 @@ void Game::initializeGame()
 	}
 
 	//CameraProjection = glm::perspective(45.0f, float(1200.0f / 720.0f), 1.0f, 10000.0f);
-	GMath::SetFrustumProjection(CameraProjection, 45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
+	GMath::SetFrustumProjection(m_Camera.m_Projection, 45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
 	//CameraProjection.FrustumProjection(60.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
 	//ShadowProjection.OrthoProjection(35.0f, -35.0f, -35.0f, 35.0f, -10.0f, 100.0f);
 
@@ -249,10 +254,10 @@ void Game::update()
 	float deltaTime = updateTimer->getElapsedTimeSeconds();
 	TotalGameTime += deltaTime;
 
-	CameraTransform = glm::mat4();
-	CameraTransform = glm::rotate(CameraTransform, float(TotalGameTime * 0.7f), glm::vec3(0, 1, 0));
-	CameraTransform = glm::translate(CameraTransform, glm::vec3(0.0f, 7.5f, 19.0f));
-	CameraTransform = glm::rotate(CameraTransform, -0.15f, glm::vec3(1, 0, 0));
+	m_Camera.m_Transform = glm::mat4();
+	m_Camera.m_Transform = glm::rotate(m_Camera.m_Transform, float(TotalGameTime * 0.7f), glm::vec3(0, 1, 0));
+	m_Camera.m_Transform = glm::translate(m_Camera.m_Transform, glm::vec3(0.0f, 7.5f, 139.0f));
+	m_Camera.m_Transform = glm::rotate(m_Camera.m_Transform, -0.15f, glm::vec3(1, 0, 0));
 
 	//GMath::SetIdentity(CameraTransform);
 	//GMath::RotateY(CameraTransform, TotalGameTime * 1.0f);
@@ -286,174 +291,36 @@ void Game::update()
 
 GLuint Game::ConvertEQtoCube(std::string filePath)
 {
-	
-	unsigned int captureFBO, captureRBO;
-	glGenFramebuffers(1, &captureFBO);
-	glGenRenderbuffers(1, &captureRBO);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
-	
 	//Convert Eq map to Cube Map
 	//-------------------------------------------------------------------------------------------
-	InitCube();
-
-	ShaderProgram eqConvertShader;
-	eqConvertShader.Load("./Assets/Shaders/EQ_to_Cube.vert", "./Assets/Shaders/EQ_to_Cube.frag");
-
-	Texture TexHouse;
-	TexHouse.LoadHDR(filePath);
-	CubeMap.CreateCubeMap(512, false);
-
-	glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-	glm::mat4 captureViews[] =
-	{
-		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
-	};
-
-	//------------------------------------------------------------------------------------------
-
-	eqConvertShader.Bind();
-	eqConvertShader.SendUniform("equirectangularMap", 0);
-	eqConvertShader.SendUniformMat4("projection", &captureProjection[0][0], false);
-
-	glActiveTexture(GL_TEXTURE0);
-	TexHouse.Bind();
-
-	glViewport(0, 0, 512, 512);
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	for(int i=0; i<6; ++i)
-	{
-		eqConvertShader.SendUniformMat4("view", &captureViews[i][0][0], false);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, CubeMap.TexObj, 0);
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		DrawCube();
-	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	TexHouse.UnBind();
-	eqConvertShader.UnBind();
+	EnvironmentmapToCubemap(filePath, CubeMap);
 
 	//Convert cube map to Irradiance Map
-//--------------------------------------------------------------------------------------------------
-	
-	ShaderProgram irradiance;
-	irradiance.Load("./Assets/Shaders/EQ_to_Cube.vert", "./Assets/Shaders/IrradianceMap.frag");
-
-	IrradianceMap.CreateCubeMap(32, false);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
-
-	irradiance.Bind();
-	irradiance.SendUniform("environmentMap", 0);
-	irradiance.SendUniformMat4("projection", &captureProjection[0][0], false);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, CubeMap.TexObj);
-
-	glViewport(0, 0, 32, 32);
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	for (int i = 0; i<6; ++i)
-	{
-		irradiance.SendUniformMat4("view", &captureViews[i][0][0], false);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, IrradianceMap.TexObj, 0);
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		DrawCube();
-	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	irradiance.UnBind();
+	//--------------------------------------------------------------------------------------------------
+	CubemapToIrradianceMap(CubeMap, IrradianceMap);
 
 	//Convert Cube map to prefilter Map
 	//---------------------------------------------------------------------------------------------------------------------------
-	PrefilterMap.CreateCubeMap(128, true);
-
-	ShaderProgram prefilter;
-	prefilter.Load("./Assets/Shaders/EQ_to_Cube.vert", "./Assets/Shaders/Prefilter.frag");
-
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-
-
-	prefilter.Bind();
-	prefilter.SendUniform("environmentMap", 0);
-	prefilter.SendUniformMat4("projection", &captureProjection[0][0], false);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, CubeMap.TexObj);
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-
-	unsigned int maxMipLevel = 5;
-	for (unsigned int mip = 0; mip < maxMipLevel; ++mip)
-	{
-		unsigned int mipWidth = 128 * std::pow(0.5, mip);
-		unsigned int mipHeight = 128 * std::pow(0.5, mip);
-		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
-		glViewport(0, 0, mipWidth, mipHeight);
-
-		float roughness = (float)mip / (float)(maxMipLevel - 1);
-		prefilter.SendUniform("roughness", roughness);
-
-		for (int i = 0; i < 6; ++i)
-		{
-			prefilter.SendUniformMat4("view", &captureViews[i][0][0], false);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, PrefilterMap.TexObj, mip);
-
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			DrawCube();
-		}
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	prefilter.UnBind();
+	CubemapToPrefiltermap(CubeMap, PrefilterMap);
 
 	//Calculate BrdfTexture
-//-----------------------------------------------------------------------------------------------------------------------------------
-	ShaderProgram brdfShader;
-	brdfShader.Load("./Assets/Shaders/PassThorugh.vert", "./Assets/Shaders/brdf.frag");
-	
-	glGenTextures(1, &BRDFMap.TexObj);
-	glBindTexture(GL_TEXTURE_2D, BRDFMap.TexObj);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	CalculateBRDF(BRDFMap);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, BRDFMap.TexObj, 0);
-
-	glViewport(0, 0, 512, 512);
-	brdfShader.Bind();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	DrawFullScreenQuad();
-
-	brdfShader.UnBind();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	return captureFBO;
+	return 0;
 }
 
 
 
 void Game::draw()
 {
+	
+	m_Renderer.Render();
+	return;
+	
+	
 	glm::vec4 camPos(0,0,0,1 );
-	camPos = CameraTransform * camPos;
+	camPos = m_Camera.m_Transform * camPos;
 	
 
 
@@ -503,8 +370,8 @@ void Game::draw()
 
 	GBufferPass.Bind();
 	GBufferPass.SendUniformMat4("uModel",&glm::mat4()[0][0], false);
-	GBufferPass.SendUniformMat4("uView", &glm::inverse(CameraTransform)[0][0], false);
-	GBufferPass.SendUniformMat4("uProj", CameraProjection.GetData(), false);
+	GBufferPass.SendUniformMat4("uView", &glm::inverse(m_Camera.m_Transform)[0][0], false);
+	GBufferPass.SendUniformMat4("uProj", m_Camera.m_Projection.GetData(), false);
 
 
 	GBufferPass.SendUniform("Albedo", 2);
@@ -594,8 +461,8 @@ void Game::draw()
 	StaticGeometry.Bind();
 	
 	
-	StaticGeometry.SendUniformMat4("view", &glm::inverse(CameraTransform)[0][0], false);
-	StaticGeometry.SendUniformMat4("projection", CameraProjection.GetData(), false);
+	StaticGeometry.SendUniformMat4("view", &glm::inverse(m_Camera.m_Transform)[0][0], false);
+	StaticGeometry.SendUniformMat4("projection", m_Camera.m_Projection.GetData(), false);
 	StaticGeometry.SendUniform("environmentMap", 0);
 	
 	glBindTexture(GL_TEXTURE_CUBE_MAP, CubeMap.TexObj);
@@ -620,7 +487,7 @@ void Game::draw()
 	DefferedLighting.SendUniform("brdfLUT", 7);
 
 
-	//DefferedLighting.SendUniform("aoMap", 5);
+	//DefferedLighting.SendUniform("aoMap", 8);
 	DefferedLighting.SendUniform("camPos", vec3({ camPos[0], camPos[1], camPos[2] }));
 	DefferedLighting.SendUniformArray("lightPositions", LightPositions, 4);
 	DefferedLighting.SendUniformArray("lightColors", LightColors, 4);
@@ -741,6 +608,12 @@ void Game::draw()
 
 	
 	glutSwapBuffers();
+}
+
+void Game::newDraw()
+{
+	//m_Renderer.Render();
+	return;
 }
 
 void Game::keyboardDown(unsigned char key, int mouseX, int mouseY)
