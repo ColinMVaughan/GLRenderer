@@ -67,6 +67,17 @@ void Renderer::Initalize()
 
 }
 
+void Renderer::InitalizeDefaultMaterial()
+{
+	m_DefaultMaterial.Roughness.Load("");
+	m_DefaultMaterial.Metallic.Load("");
+
+	m_DefaultMaterial.Albedo.Load("");
+	m_DefaultMaterial.Normal.Load("");
+	m_DefaultMaterial.AO.Load("");
+
+}
+
 //-----------------------------------------------------------
 // Purpose: Loads an HDR equairectangular map and converts it to a cube map.
 //			Then creates nessisary textures for IBL rendering.
@@ -154,9 +165,11 @@ void Renderer::Render()
 	GBufferPass.SendUniformMat4("uView", &glm::inverse(m_Camera->m_Transform)[0][0], false);
 	GBufferPass.SendUniformMat4("uProj", m_Camera->m_Projection.GetData(), false);
 
+	GBufferPass.SendUniform("Normal", 3);
 	GBufferPass.SendUniform("Albedo", 2);
 	GBufferPass.SendUniform("Roughness", 1);
 	GBufferPass.SendUniform("Metallic", 0);
+
 
 	//Draw each mesh in Meshlist.
 	GBuffer.Bind();
@@ -169,11 +182,14 @@ void Renderer::Render()
 		MaterialList[i]->Roughness.Bind();
 		glActiveTexture(GL_TEXTURE2);
 		MaterialList[i]->Albedo.Bind();
+		glActiveTexture(GL_TEXTURE3);
+		MaterialList[i]->Normal.Bind();
 
 		glBindVertexArray(MeshList[i]->VAO);
 		glDrawArrays(GL_TRIANGLES, 0, MeshList[i]->GetNumVertices());
 		glBindVertexArray(0);
 
+		glActiveTexture(GL_TEXTURE12);
 		MaterialList[i]->Albedo.UnBind();
 		glActiveTexture(GL_TEXTURE1);
 		MaterialList[i]->Roughness.UnBind();

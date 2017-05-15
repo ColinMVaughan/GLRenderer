@@ -23,6 +23,7 @@ uniform vec3 lightColors[4];
 
 const float PI = 3.14159265359;
 
+
 //Cook-Torrance specular BRDF:
 //DFG / (4(w0 . N)(wi . N))
 
@@ -92,7 +93,7 @@ void main()
 	float ao			= texture(aoMap, texcoord).r;
 	
 	
-	normal = normal; //* 2.0 - 1.0; //unpack normal.
+	normal = normal * 2.0 - 1.0; //unpack normal.
 	vec3 N = normal;//normalize(normal);
 	vec3 V = normalize(camPos - position);
 	vec3 R = reflect(-V,N);

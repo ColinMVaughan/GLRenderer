@@ -34,17 +34,22 @@ void Game::initializeGame()
 		system("pause");
 		exit(0);
 	}
-	if (!GunMat.Albedo.Load("./Assets/Textures/Rust/Albedo.png"))
+	if (!GunMat.Albedo.Load("./Assets/Textures/Cobblestone/Albedo.png"))
 	{
 		system("pause");
 		exit(0);
 	}
-	if (!GunMat.Metallic.Load("./Assets/Textures/Rust/Metallic1.png"))
+	if (!GunMat.Metallic.Load("./Assets/Textures/Cobblestone/Metallic.png"))
 	{
 		system("pause");
 		exit(0);
 	}
-	if (!GunMat.Roughness.Load("./Assets/Textures/Rust/Roughness1.png"))
+	if (!GunMat.Roughness.Load("./Assets/Textures/Cobblestone/Roughness.png"))
+	{
+		system("pause");
+		exit(0);
+	}
+	if (!GunMat.Normal.Load("./Assets/Textures/Cobblestone/Normal.png"))
 	{
 		system("pause");
 		exit(0);

@@ -12,15 +12,27 @@ Texture::~Texture()
 
 bool Texture::Load(const std::string &file)
 {
+
 	stbi_set_flip_vertically_on_load(true);
 	int width, height, nrComponrnts;
-	unsigned char* image = stbi_load(file.c_str(), &width, &height, &nrComponrnts, STBI_rgb_alpha);
+	unsigned char* image = stbi_load(file.c_str(), &width, &height, &nrComponrnts, 0);
 
 	if (image)
 	{
+		GLenum format;
+		if (nrComponrnts == 1)
+			format = GL_RED;
+		else if (nrComponrnts == 3)
+			format = GL_RGB;
+		else if (nrComponrnts == 4)
+			format = GL_RGBA;
+		else
+			return false;
+
+
 		glGenTextures(1, &TexObj);
 		glBindTexture(GL_TEXTURE_2D, TexObj);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, image);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

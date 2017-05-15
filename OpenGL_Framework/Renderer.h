@@ -11,6 +11,14 @@ struct Material
 	Material(){}
 	~Material(){}
 
+	void SetAlbedo(){}
+	void SetNormal(){}
+	void SetAO(){}
+
+	void SetRoughness(){}
+	void SetMetallic(){}
+
+
 	Texture Albedo;
 	Texture Normal;
 	Texture AO;
@@ -58,19 +66,28 @@ public:
 	void Render();
 
 private:
+	void InitalizeDefaultMaterial();
+
+
+
+
 	unsigned m_WindowWidth;
 	unsigned m_WindowHeight;
 
 	 Camera* m_Camera;
 
+	//Mesh and materials
 	std::vector<Mesh*> MeshList;
 	std::vector<Material*> MaterialList;
 
+	//Lights
 	std::vector<GMath::vec3f> m_PointLightColors;
 	std::vector<GMath::vec3f> m_PointLightPositions;
 
+	//updateTimer
 	Timer* m_UpdateTimer;
 
+	//Framebuffers
 	FrameBuffer GBuffer;
 	FrameBuffer DefferedComposite;
 
@@ -79,9 +96,12 @@ private:
 	ShaderProgram GBufferPass;
 	ShaderProgram DefferedLighting;
 	
-
+	//Environment maps
 	Texture m_CubeMap;
 	Texture m_IrradianceMap;
 	Texture m_PrefilterMap;
 	Texture m_BDRFMap;
+
+	//Default Material
+	Material m_DefaultMaterial;
 };

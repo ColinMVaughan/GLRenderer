@@ -3,6 +3,7 @@
 uniform sampler2D Albedo;
 uniform sampler2D Roughness;
 uniform sampler2D Metallic;
+uniform sampler2D Normal;
 
 in vec2 texcoord;
 in vec3 norm;
@@ -14,6 +15,23 @@ layout (location = 2) out vec3 outPosition;
 
 layout (location = 3) out vec4 outRoughness;
 layout (location = 4) out vec4 outMetallic;
+
+vec3 getNormalFromMap()
+{
+    vec3 tangentNormal = texture(Normal, texcoord).xyz * 2.0 - 1.0;
+
+    vec3 Q1  = dFdx(pos);
+    vec3 Q2  = dFdy(pos);
+    vec2 st1 = dFdx(texcoord);
+    vec2 st2 = dFdy(texcoord);
+
+    vec3 N   = normalize(norm);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * tangentNormal);
+}
 
 void main()
 {
@@ -32,7 +50,7 @@ void main()
 	//Pack Normals
 		//in-> [-1,1]
 		//out->[0,1]
-	outNormals = normalize(norm); //* 0.5 + 0.5;
+	outNormals = normalize(getNormalFromMap()) * 0.5 + 0.5;
 
 	//viewSpace Positions
 	outPosition = pos;
