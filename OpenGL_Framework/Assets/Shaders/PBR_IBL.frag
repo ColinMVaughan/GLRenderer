@@ -74,15 +74,16 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 
 void main()
 {
-
-	vec3 albedo			= texture(albedoMap, texcoord).rgb;
-	albedo.x = pow(albedo.x, 2.2);
-	albedo.y = pow(albedo.y, 2.2);
-	albedo.z = pow(albedo.z, 2.2);
+	//convert sRGB to linear color-space
+	vec3 albedo	= texture(albedoMap, texcoord).rgb;
+	albedo.x 	= pow(albedo.x, 2.2);
+	albedo.y	= pow(albedo.y, 2.2);
+	albedo.z 	= pow(albedo.z, 2.2);
 	
-	vec3 normal			= texture(normalMap, texcoord).xyz;
-	vec3 position		= texture(positionMap, texcoord).xyz;
+	vec3 normal		= texture(normalMap, texcoord).xyz;
+	vec3 position	= texture(positionMap, texcoord).xyz;
 	
+	//discard unnessisary fragmnets
 	if(length(position)==0)
 	{
 		discard;
@@ -94,14 +95,14 @@ void main()
 	
 	
 	normal = normal * 2.0 - 1.0; //unpack normal.
-	vec3 N = normal;//normalize(normal);
+	vec3 N = normal;
 	vec3 V = normalize(camPos - position);
 	vec3 R = reflect(-V,N);
 	
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0,albedo,metallic);
 	
-	//reflectance equaition
+	//Calculate Each light (will be removed when lighting is refactored)
 	vec3 Lo = vec3(0.0);
 	for(int i=0; i< 4; ++i)
 	{
@@ -127,7 +128,6 @@ void main()
 		kD *= 1.0 - metallic;
 		
 
-		
 		//add to outgoing radiance Lo
 		float NdotL = max(dot(N,L),0.0);
 		Lo += (kD * albedo / PI + specular) * radiance * NdotL;
@@ -151,9 +151,10 @@ void main()
 	vec3 ambiant = (kD * diffuse + specular) * ao;
 	
 	
-	//vec3 ambiant = vec3(0.03) * albedo *ao;
+	//Combine ambiant color with summed light influence
 	vec3 color = ambiant + Lo;
 	
+	//Gamma correct color
 	color = color / (color + vec3(1.0));
 	color = pow(color,vec3(1.0/2.2));
 	
