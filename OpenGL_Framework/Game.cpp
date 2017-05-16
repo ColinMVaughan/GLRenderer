@@ -43,7 +43,7 @@ void Game::initializeGame()
 	m_Renderer.AddPointLight(vec3({ 3000.0f, 3000.0f, 3000.0f }), vec3({ -50.0f, 50.0f, -50.0f }), false);
 
 
-	std::string folders[] = { "Cobblestone","Gold","Iron","Rust"};
+	std::string folders[] = { "Whethered_Steel","Gold","Iron","Rust"};
 	for (int i = 0; i< 1; ++i)
 	{
 		if (!m_Materials[i].Albedo.Load("./Assets/Textures/" + folders[i] + "/Albedo.png"))
@@ -89,7 +89,7 @@ void Game::update()
 
 	m_Camera.m_Transform = glm::mat4();
 	m_Camera.m_Transform = glm::rotate(m_Camera.m_Transform, float(TotalGameTime * 0.7f), glm::vec3(0, 1, 0));
-	m_Camera.m_Transform = glm::translate(m_Camera.m_Transform, glm::vec3(0.0f, 7.5f, 19.0f));
+	m_Camera.m_Transform = glm::translate(m_Camera.m_Transform, glm::vec3(0.0f, 7.5f, 15.0f));
 	m_Camera.m_Transform = glm::rotate(m_Camera.m_Transform, -0.15f, glm::vec3(1, 0, 0));
 
 }
