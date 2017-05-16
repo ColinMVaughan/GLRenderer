@@ -49,6 +49,7 @@ void Renderer::Initalize()
 	GBuffer.InitColorTexture(2, m_WindowWidth, m_WindowHeight, GL_RGB32F, GL_NEAREST, GL_CLAMP_TO_EDGE);	//ViewSpace Positions (xyz)
 	GBuffer.InitColorTexture(3, m_WindowWidth, m_WindowHeight, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);	//Roughness Factor
 	GBuffer.InitColorTexture(4, m_WindowWidth, m_WindowHeight, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);	//Metallic Factor
+	GBuffer.InitColorTexture(5, m_WindowWidth, m_WindowHeight, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);	//AO Factor
 	if (!GBuffer.CheckFBO())
 	{
 		std::cout << "FBO Failed to Initalize.\n";
@@ -165,6 +166,7 @@ void Renderer::Render()
 	GBufferPass.SendUniformMat4("uView", &glm::inverse(m_Camera->m_Transform)[0][0], false);
 	GBufferPass.SendUniformMat4("uProj", m_Camera->m_Projection.GetData(), false);
 
+	GBufferPass.SendUniform("AO", 4);
 	GBufferPass.SendUniform("Normal", 3);
 	GBufferPass.SendUniform("Albedo", 2);
 	GBufferPass.SendUniform("Roughness", 1);
@@ -184,12 +186,17 @@ void Renderer::Render()
 		MaterialList[i]->Albedo.Bind();
 		glActiveTexture(GL_TEXTURE3);
 		MaterialList[i]->Normal.Bind();
+		glActiveTexture(GL_TEXTURE4);
+		MaterialList[i]->AO.Bind();
 
 		glBindVertexArray(MeshList[i]->VAO);
 		glDrawArrays(GL_TRIANGLES, 0, MeshList[i]->GetNumVertices());
 		glBindVertexArray(0);
 
-		glActiveTexture(GL_TEXTURE12);
+		MaterialList[i]->AO.UnBind();
+		glActiveTexture(GL_TEXTURE3);
+		MaterialList[i]->Normal.UnBind();
+		glActiveTexture(GL_TEXTURE2);
 		MaterialList[i]->Albedo.UnBind();
 		glActiveTexture(GL_TEXTURE1);
 		MaterialList[i]->Roughness.UnBind();
@@ -235,6 +242,8 @@ void Renderer::Render()
 	DefferedLighting.SendUniform("prefilterMap", 6);
 	DefferedLighting.SendUniform("brdfLUT", 7);
 
+	DefferedLighting.SendUniform("aoMap", 8);
+
 
 	//DefferedLighting.SendUniform("aoMap", 8);
 	DefferedLighting.SendUniform("camPos", m_Camera->GetPosition());
@@ -258,7 +267,11 @@ void Renderer::Render()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_PrefilterMap.TexObj);
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D, m_BDRFMap.TexObj);
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(5));
 	DrawFullScreenQuad();
+	glBindTexture(GL_TEXTURE_2D, GL_NONE);
+	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D, GL_NONE);
 	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, GL_NONE);

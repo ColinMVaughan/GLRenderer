@@ -26,44 +26,54 @@ void Game::initializeGame()
 	GMath::SetFrustumProjection(m_Camera.m_Projection, 45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 1.0f, 10000.0f);
 
 
-	//Orb stuff for PBR test & New Renderer Test
+	//Load Orb / different materials & initalize renderer
 //-----------------------------------------------------------------
-	if (!Orb.LoadFromFile("./Assets/Models/Gun.obj"))
+	if (!Orb.LoadFromFile("./Assets/Models/SampleSphere.obj"))
 	{
 		std::cout << "Couldn't find the monkey.\n";
 		system("pause");
 		exit(0);
 	}
-	if (!GunMat.Albedo.Load("./Assets/Textures/Gun/Albedo.png"))
-	{
-		system("pause");
-		exit(0);
-	}
-	if (!GunMat.Metallic.Load("./Assets/Textures/Gun/Metallic.png"))
-	{
-		system("pause");
-		exit(0);
-	}
-	if (!GunMat.Roughness.Load("./Assets/Textures/Gun/Roughness.png"))
-	{
-		system("pause");
-		exit(0);
-	}
-	if (!GunMat.Normal.Load("./Assets/Textures/Gun/Normal.png"))
-	{
-		system("pause");
-		exit(0);
-	}
 
 	m_Renderer.Initalize();
-	m_Renderer.AddMesh(&Orb, &GunMat);
-	m_Renderer.InitalizePBREnvironmentMaps("./Assets/Textures/GCanyon_C_YumaPoint_3k.hdr");
+	m_Renderer.InitalizePBREnvironmentMaps("./Assets/Textures/Tokyo_BigSight_3k.hdr");
 	m_Renderer.AddPointLight(vec3({ 300.0f, 300.0f, 300.0f }), vec3({ 1.0f, 1.0f, -10.0f }), false);
 	m_Renderer.AddPointLight(vec3({ 3000.0f, 3000.0f, 3000.0f }), vec3({ 50.0f, -50.0f, -50.0f }), false);
 	m_Renderer.AddPointLight(vec3({ 3000.0f, 3000.0f, 3000.0f }), vec3({ -50.0f, -50.0f, 50.0f }), false);
 	m_Renderer.AddPointLight(vec3({ 3000.0f, 3000.0f, 3000.0f }), vec3({ -50.0f, 50.0f, -50.0f }), false);
 
 
+	std::string folders[] = { "Cobblestone","Gold","Iron","Rust"};
+	for (int i = 0; i< 1; ++i)
+	{
+		if (!m_Materials[i].Albedo.Load("./Assets/Textures/" + folders[i] + "/Albedo.png"))
+		{
+			system("pause");
+			exit(0);
+		}
+		if (!m_Materials[i].Metallic.Load("./Assets/Textures/"+ folders[i] +"/Metallic.png"))
+		{
+			system("pause");
+			exit(0);
+		}
+		if (!m_Materials[i].Roughness.Load("./Assets/Textures/" + folders[i] + "/Roughness.png"))
+		{
+			system("pause");
+			exit(0);
+		}
+		if (!m_Materials[i].Normal.Load("./Assets/Textures/" + folders[i] + "/Normal.png"))
+		{
+			system("pause");
+			exit(0);
+		}
+		if(!m_Materials[i].AO.Load("./Assets/Textures/" + folders[i] + "/AO.png"))
+		{
+			system("pause");
+			exit(0);
+		}
+
+	}
+	m_Renderer.AddMesh(&Orb, &m_Materials[0]);
 	return;
 
 }
@@ -79,7 +89,7 @@ void Game::update()
 
 	m_Camera.m_Transform = glm::mat4();
 	m_Camera.m_Transform = glm::rotate(m_Camera.m_Transform, float(TotalGameTime * 0.7f), glm::vec3(0, 1, 0));
-	m_Camera.m_Transform = glm::translate(m_Camera.m_Transform, glm::vec3(0.0f, 7.5f, 150.0f));
+	m_Camera.m_Transform = glm::translate(m_Camera.m_Transform, glm::vec3(0.0f, 7.5f, 19.0f));
 	m_Camera.m_Transform = glm::rotate(m_Camera.m_Transform, -0.15f, glm::vec3(1, 0, 0));
 
 }

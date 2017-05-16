@@ -58,5 +58,5 @@ private:
 	Renderer m_Renderer;
 	Mesh Orb;
 	Camera m_Camera;
-	Material GunMat;
+	Material m_Materials[5];
 };
