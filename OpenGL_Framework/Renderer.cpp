@@ -118,7 +118,7 @@ void Renderer::AddMesh(Mesh* mesh, Material* material)
 //
 // TODO: Add safegaurds
 //---------------------------------------------------
-void Renderer::AddPointLight(GMath::vec3f lightColor, GMath::vec3f lightpPosition, bool castsShadows)
+void Renderer::AddPointLight(GMath::vec3f* lightColor, GMath::vec3f* lightpPosition, bool castsShadows)
 {
 	m_PointLightPositions.push_back(lightpPosition);
 	m_PointLightColors.push_back(lightColor);
@@ -247,8 +247,8 @@ void Renderer::Render()
 
 	//DefferedLighting.SendUniform("aoMap", 8);
 	DefferedLighting.SendUniform("camPos", m_Camera->GetPosition());
-	DefferedLighting.SendUniformArray("lightPositions", m_PointLightPositions.data(), 4);
-	DefferedLighting.SendUniformArray("lightColors", m_PointLightColors.data(), 4);
+	DefferedLighting.SendUniformArray("lightPositions", *m_PointLightPositions.data(), 4);
+	DefferedLighting.SendUniformArray("lightColors", *m_PointLightColors.data(), 4);
 
 	DefferedComposite.Bind();
 

@@ -17,8 +17,8 @@
 #include "Timer.h"
 #include "Renderer.h"
 
-#define WINDOW_WIDTH		1200
-#define WINDOW_HEIGHT		720
+#define WINDOW_WIDTH		1920
+#define WINDOW_HEIGHT		1080
 #define FRAMES_PER_SECOND	60
 #define BLOOM_THRESHOLD		0.35f
 #define BLOOM_DOWNSCALE		4.0f
@@ -59,4 +59,7 @@ private:
 	Mesh Orb;
 	Camera m_Camera;
 	Material m_Materials[5];
+
+	GMath::vec3f lightPos;
+	GMath::vec3f lightColor;
 };

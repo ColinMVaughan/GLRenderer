@@ -1,12 +1,14 @@
 #include "Game.h"
 #include "Utilities.h"
 
-//DEFFERED UPGRADE1
 
 Game::Game()
 : m_Renderer(WINDOW_HEIGHT,WINDOW_WIDTH, &m_Camera)
 {
+	lightPos = GMath::vec3f({0.0f, 15.0f, -10.0f});
+	//lightPos = GMath::vec3f({ 0.0f, 15.0f, -10.0f });
 
+	lightColor = GMath::vec3f({ 1000.0f, 1000.0f, 1000.0f });
 
 }
 
@@ -37,14 +39,14 @@ void Game::initializeGame()
 
 	m_Renderer.Initalize();
 	m_Renderer.InitalizePBREnvironmentMaps("./Assets/Textures/Tokyo_BigSight_3k.hdr");
-	m_Renderer.AddPointLight(vec3({ 300.0f, 300.0f, 300.0f }), vec3({ 1.0f, 1.0f, -10.0f }), false);
-	m_Renderer.AddPointLight(vec3({ 3000.0f, 3000.0f, 3000.0f }), vec3({ 50.0f, -50.0f, -50.0f }), false);
-	m_Renderer.AddPointLight(vec3({ 3000.0f, 3000.0f, 3000.0f }), vec3({ -50.0f, -50.0f, 50.0f }), false);
-	m_Renderer.AddPointLight(vec3({ 3000.0f, 3000.0f, 3000.0f }), vec3({ -50.0f, 50.0f, -50.0f }), false);
+	m_Renderer.AddPointLight(&lightColor, &lightPos, false);
+	//m_Renderer.AddPointLight(vec3({ 3000.0f, 3000.0f, 3000.0f }), vec3({ 50.0f, -50.0f, -50.0f }), false);
+	//m_Renderer.AddPointLight(vec3({ 3000.0f, 3000.0f, 3000.0f }), vec3({ -50.0f, -50.0f, 50.0f }), false);
+	//m_Renderer.AddPointLight(vec3({ 3000.0f, 3000.0f, 3000.0f }), vec3({ -50.0f, 50.0f, -50.0f }), false);
 
 
-	std::string folders[] = { "Whethered_Steel","Gold","Iron","Rust"};
-	for (int i = 0; i< 1; ++i)
+	std::string folders[] = { "Whethered_Steel","Gold","Blood_Wood","Rust","Cobblestone"};
+	for (int i = 0; i< 5; ++i)
 	{
 		if (!m_Materials[i].Albedo.Load("./Assets/Textures/" + folders[i] + "/Albedo.png"))
 		{
@@ -73,7 +75,7 @@ void Game::initializeGame()
 		}
 
 	}
-	m_Renderer.AddMesh(&Orb, &m_Materials[0]);
+	m_Renderer.AddMesh(&Orb, &m_Materials[2]);
 	return;
 
 }
@@ -88,8 +90,8 @@ void Game::update()
 	TotalGameTime += deltaTime;
 
 	m_Camera.m_Transform = glm::mat4();
-	m_Camera.m_Transform = glm::rotate(m_Camera.m_Transform, float(TotalGameTime * 0.7f), glm::vec3(0, 1, 0));
-	m_Camera.m_Transform = glm::translate(m_Camera.m_Transform, glm::vec3(0.0f, 7.5f, 15.0f));
+	m_Camera.m_Transform = glm::rotate(m_Camera.m_Transform, float(TotalGameTime * 0.2f), glm::vec3(0, 1, 0));
+	m_Camera.m_Transform = glm::translate(m_Camera.m_Transform, glm::vec3(0.0f, 5.5f, 10.0f));
 	m_Camera.m_Transform = glm::rotate(m_Camera.m_Transform, -0.15f, glm::vec3(1, 0, 0));
 
 }

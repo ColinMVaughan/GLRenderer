@@ -61,7 +61,7 @@ public:
 	void Initalize();
 	void InitalizePBREnvironmentMaps(std::string filepath);
 	void AddMesh(Mesh* mesh, Material* material);
-	void AddPointLight(GMath::vec3f lightColor, GMath::vec3f lightpPsition, bool castsShadows);
+	void AddPointLight(GMath::vec3f* lightColor, GMath::vec3f* lightpPsition, bool castsShadows);
 	void AddDirectionalLight(GMath::vec3f lightColor, GMath::vec3f lightDirection, bool castsShadows);
 	void Render();
 
@@ -81,8 +81,8 @@ private:
 	std::vector<Material*> MaterialList;
 
 	//Lights
-	std::vector<GMath::vec3f> m_PointLightColors;
-	std::vector<GMath::vec3f> m_PointLightPositions;
+	std::vector<GMath::vec3f*> m_PointLightColors;
+	std::vector<GMath::vec3f*> m_PointLightPositions;
 
 	//updateTimer
 	Timer* m_UpdateTimer;
