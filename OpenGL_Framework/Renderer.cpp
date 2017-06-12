@@ -66,6 +66,14 @@ void Renderer::Initalize()
 		exit(0);
 	}
 
+	CombinedLighing.InitColorTexture(0, m_WindowWidth, m_WindowHeight, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);
+	if(!CombinedLighing.CheckFBO())
+	{
+		std::cout << "Combined Lighing FBO failed to init.\n";
+		system("pause");
+		exit(0);
+	}
+
 }
 
 void Renderer::InitalizeDefaultMaterial()
@@ -245,7 +253,6 @@ void Renderer::Render()
 	DefferedLighting.SendUniform("aoMap", 8);
 
 
-	//DefferedLighting.SendUniform("aoMap", 8);
 	DefferedLighting.SendUniform("camPos", m_Camera->GetPosition());
 	DefferedLighting.SendUniformArray("lightPositions", *m_PointLightPositions.data(), 4);
 	DefferedLighting.SendUniformArray("lightColors", *m_PointLightColors.data(), 4);
@@ -290,6 +297,14 @@ void Renderer::Render()
 
 	DefferedComposite.UnBind();
 	DefferedLighting.UnBind();
+
+
+	//--------------------------------------------------------
+	// IBL + Composite Lighting
+	//--------------------------------------------------------
+
+
+
 
 	DefferedComposite.MoveToBackBuffer(m_WindowWidth, m_WindowHeight);
 	glutSwapBuffers();
