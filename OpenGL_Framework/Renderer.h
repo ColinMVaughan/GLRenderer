@@ -96,6 +96,7 @@ private:
 	ShaderProgram StaticGeometry;
 	ShaderProgram GBufferPass;
 	ShaderProgram DefferedLighting;
+	ShaderProgram LightingCombined;
 	
 	//Environment maps
 	Texture m_CubeMap;

@@ -302,8 +302,63 @@ void Renderer::Render()
 	//--------------------------------------------------------
 	// IBL + Composite Lighting
 	//--------------------------------------------------------
+	CombinedLighing.Bind();
+	LightingCombined.Bind();
+
+	DefferedLighting.SendUniform("albedoMap", 0);
+	DefferedLighting.SendUniform("normalMap", 1);
+	DefferedLighting.SendUniform("positionMap", 2);
+
+	DefferedLighting.SendUniform("roughnessMap", 3);
+	DefferedLighting.SendUniform("metallicMap", 4);
+
+	DefferedLighting.SendUniform("irradianceMap", 5);
+	DefferedLighting.SendUniform("prefilterMap", 6);
+	DefferedLighting.SendUniform("brdfLUT", 7);
+
+	DefferedLighting.SendUniform("aoMap", 8);
 
 
+	DefferedLighting.SendUniform("camPos", m_Camera->GetPosition());
+	DefferedLighting.SendUniformArray("lightPositions", *m_PointLightPositions.data(), 4);
+	DefferedLighting.SendUniformArray("lightColors", *m_PointLightColors.data(), 4);
+
+
+	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(0));
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(1));
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(2));
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(3));
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(4));
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_IrradianceMap.TexObj);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_PrefilterMap.TexObj);
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, m_BDRFMap.TexObj);
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(5));
+	DrawFullScreenQuad();
+	glBindTexture(GL_TEXTURE_2D, GL_NONE);
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, GL_NONE);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, GL_NONE);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, GL_NONE);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, GL_NONE);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, GL_NONE);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, GL_NONE);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, GL_NONE);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, GL_NONE);
 
 
 	DefferedComposite.MoveToBackBuffer(m_WindowWidth, m_WindowHeight);
