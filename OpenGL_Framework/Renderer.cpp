@@ -246,11 +246,8 @@ void Renderer::Render()
 	DefferedLighting.SendUniform("roughnessMap", 3);
 	DefferedLighting.SendUniform("metallicMap", 4);
 
-	DefferedLighting.SendUniform("irradianceMap", 5);
-	DefferedLighting.SendUniform("prefilterMap", 6);
-	DefferedLighting.SendUniform("brdfLUT", 7);
 
-	DefferedLighting.SendUniform("aoMap", 8);
+	DefferedLighting.SendUniform("aoMap", 5);
 
 
 	DefferedLighting.SendUniform("camPos", m_Camera->GetPosition());
@@ -269,20 +266,8 @@ void Renderer::Render()
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(4));
 	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_IrradianceMap.TexObj);
-	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_PrefilterMap.TexObj);
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D, m_BDRFMap.TexObj);
-	glActiveTexture(GL_TEXTURE8);
 	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(5));
 	DrawFullScreenQuad();
-	glBindTexture(GL_TEXTURE_2D, GL_NONE);
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D, GL_NONE);
-	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, GL_NONE);
-	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, GL_NONE);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, GL_NONE);
@@ -300,7 +285,7 @@ void Renderer::Render()
 
 
 	//--------------------------------------------------------
-	// IBL + Composite Lighting
+	//				IBL + Composite Lighting
 	//--------------------------------------------------------
 	CombinedLighing.Bind();
 	LightingCombined.Bind();
@@ -317,11 +302,8 @@ void Renderer::Render()
 	DefferedLighting.SendUniform("brdfLUT", 7);
 
 	DefferedLighting.SendUniform("aoMap", 8);
-
-
+	DefferedLighting.SendUniform("", 9);
 	DefferedLighting.SendUniform("camPos", m_Camera->GetPosition());
-	DefferedLighting.SendUniformArray("lightPositions", *m_PointLightPositions.data(), 4);
-	DefferedLighting.SendUniformArray("lightColors", *m_PointLightColors.data(), 4);
 
 
 	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(0));
@@ -341,7 +323,11 @@ void Renderer::Render()
 	glBindTexture(GL_TEXTURE_2D, m_BDRFMap.TexObj);
 	glActiveTexture(GL_TEXTURE8);
 	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(5));
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(5));
 	DrawFullScreenQuad();
+	glBindTexture(GL_TEXTURE_2D, GL_NONE);
+	glActiveTexture(GL_TEXTURE8);
 	glBindTexture(GL_TEXTURE_2D, GL_NONE);
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D, GL_NONE);

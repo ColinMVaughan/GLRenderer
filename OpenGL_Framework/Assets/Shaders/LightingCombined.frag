@@ -17,9 +17,6 @@ uniform samplerCube irradianceMap;
 uniform samplerCube prefilterMap;
 uniform sampler2D 	brdfLUT;
 
-//lights
-uniform vec3 lightPositions[4];
-uniform vec3 lightColors[4];
 
 const float PI = 3.14159265359;
 

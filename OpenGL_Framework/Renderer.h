@@ -6,6 +6,10 @@
 #include "FrameBuffer.h"
 #include <glm/mat4x4.hpp>
 
+//-----------------------------
+// Material represents the look and feel of an object.
+// use a combination of texture maps to achieve this.
+//----------------------------
 struct Material
 {
 	Material(){}
@@ -31,7 +35,11 @@ struct Material
 
 struct PointLight
 {
-	
+public:
+	PointLight();
+private:
+	glm::vec3 LightPosition;
+	glm::vec3 LightColor;
 };
 
 class Camera
