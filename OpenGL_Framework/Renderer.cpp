@@ -232,7 +232,7 @@ void Renderer::Render()
 	//-----------------------------------------------
 	//			Render Skybox
 	//----------------------------------------------
-	LightpassBuffer.Bind();
+	CombinedLighingBuffer.Bind();
 	StaticGeometry.Bind();
 
 
@@ -245,7 +245,7 @@ void Renderer::Render()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 	StaticGeometry.UnBind();
-	LightpassBuffer.UnBind();
+	CombinedLighingBuffer.UnBind();
 
 	//--------------------------------------------------------
 	//			Deffered Lighting Pass
@@ -263,10 +263,9 @@ void Renderer::Render()
 
 	LightPassShader.SendUniform("aoMap", 5);
 
-
 	LightPassShader.SendUniform("camPos", m_Camera->GetPosition());
-	LightPassShader.SendUniformArray("lightPositions", *m_PointLightPositions.data(), 4);
-	LightPassShader.SendUniformArray("lightColors", *m_PointLightColors.data(), 4);
+	LightPassShader.SendUniform("lightPosition", *m_PointLightPositions[0]);
+	LightPassShader.SendUniform("lightColor", *m_PointLightColors[0]);
 
 	LightpassBuffer.Bind();
 

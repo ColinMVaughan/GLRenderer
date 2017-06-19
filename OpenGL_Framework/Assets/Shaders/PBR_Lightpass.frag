@@ -17,8 +17,8 @@ uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 
 //lights
-uniform vec3 lightPositions;
-uniform vec3 lightColors;
+uniform vec3 lightPosition;
+uniform vec3 lightColor;
 
 const float PI = 3.14159265359;
 
@@ -114,11 +114,11 @@ void main()
 	vec3 Lo = vec3(0.0);
 	
 		//Calculate per-light radiance
-		vec3 L 			  = normalize(lightPositions[i] - position);
+		vec3 L 			  = normalize(lightPosition - position);
 		vec3 H			  = normalize(V + L);
-		float distance    = length(lightPositions[i] - position);
+		float distance    = length(lightPosition - position);
 		float attenuation = 1.0 / (distance * distance);
-		vec3 radiance 	  = lightColors[i] * attenuation;
+		vec3 radiance 	  = lightColor * attenuation;
 		
 		
 		//cook-torrance brdf

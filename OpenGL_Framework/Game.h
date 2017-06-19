@@ -17,8 +17,8 @@
 #include "Timer.h"
 #include "Renderer.h"
 
-#define WINDOW_WIDTH		1920
-#define WINDOW_HEIGHT		1080
+#define WINDOW_WIDTH		800
+#define WINDOW_HEIGHT		600
 #define FRAMES_PER_SECOND	60
 #define BLOOM_THRESHOLD		0.35f
 #define BLOOM_DOWNSCALE		4.0f

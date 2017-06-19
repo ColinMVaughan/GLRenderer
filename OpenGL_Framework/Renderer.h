@@ -64,7 +64,7 @@ public:
 	Renderer(unsigned windowHeight, unsigned windowWidth, Camera* camera)
 		:m_WindowWidth(windowWidth), m_WindowHeight(windowHeight), 
 		m_Camera(camera),
-		GBuffer(6), DefferedComposite(1), CombinedLighing(1){}
+		GBuffer(6), LightpassBuffer(1), CombinedLighingBuffer(1){}
 
 	void Initalize();
 	void InitalizePBREnvironmentMaps(std::string filepath);
@@ -97,8 +97,8 @@ private:
 
 	//Framebuffers
 	FrameBuffer GBuffer;
-	FrameBuffer DefferedComposite;
-	FrameBuffer CombinedLighing;
+	FrameBuffer LightpassBuffer;
+	FrameBuffer CombinedLighingBuffer;
 
 	//Shaders used for rendering
 	ShaderProgram StaticGeometry;
