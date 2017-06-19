@@ -34,7 +34,21 @@ void Renderer::Initalize()
 		exit(0);
 	}
 
-	if (!DefferedLighting.Load("./Assets/Shaders/PassThorugh.vert", "./Assets/Shaders/PBR_IBL.frag"))
+	if (!LightPassShader.Load("./Assets/Shaders/PassThorugh.vert", "./Assets/Shaders/PBR_Lightpass.frag"))
+	{
+		std::cout << "Shaders failed to initalize.\n";
+		system("pause");
+		exit(0);
+	}
+
+	if (!LightPassShader.Load("./Assets/Shaders/PassThorugh.vert", "./Assets/Shaders/PBR_Lightpass.frag"))
+	{
+		std::cout << "Shaders failed to initalize.\n";
+		system("pause");
+		exit(0);
+	}
+
+	if (!LightingCombinedShader.Load("./Assets/Shaders/PassThorugh.vert", "./Assets/Shaders/LightingCombined.frag"))
 	{
 		std::cout << "Shaders failed to initalize.\n";
 		system("pause");
@@ -58,16 +72,16 @@ void Renderer::Initalize()
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------------------------------------
-	DefferedComposite.InitColorTexture(0, m_WindowWidth, m_WindowHeight, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);
-	if (!DefferedComposite.CheckFBO())
+	LightpassBuffer.InitColorTexture(0, m_WindowWidth, m_WindowHeight, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);
+	if (!LightpassBuffer.CheckFBO())
 	{
 		std::cout << "FBO Failed to Initalize.\n";
 		system("pause");
 		exit(0);
 	}
 
-	CombinedLighing.InitColorTexture(0, m_WindowWidth, m_WindowHeight, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);
-	if(!CombinedLighing.CheckFBO())
+	CombinedLighingBuffer.InitColorTexture(0, m_WindowWidth, m_WindowHeight, GL_RGBA8, GL_NEAREST, GL_CLAMP_TO_EDGE);
+	if(!CombinedLighingBuffer.CheckFBO())
 	{
 		std::cout << "Combined Lighing FBO failed to init.\n";
 		system("pause");
@@ -159,7 +173,7 @@ void Renderer::Render()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 0);
-	DefferedComposite.Clear();
+	LightpassBuffer.Clear();
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	GBuffer.Clear();
@@ -218,7 +232,7 @@ void Renderer::Render()
 	//-----------------------------------------------
 	//			Render Skybox
 	//----------------------------------------------
-	DefferedComposite.Bind();
+	LightpassBuffer.Bind();
 	StaticGeometry.Bind();
 
 
@@ -231,30 +245,30 @@ void Renderer::Render()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 	StaticGeometry.UnBind();
-	DefferedComposite.UnBind();
+	LightpassBuffer.UnBind();
 
 	//--------------------------------------------------------
 	//			Deffered Lighting Pass
 	//--------------------------------------------------------
 	glViewport(0, 0, m_WindowWidth, m_WindowHeight);
-	DefferedLighting.Bind();
+	LightPassShader.Bind();
 
-	DefferedLighting.SendUniform("albedoMap", 0);
-	DefferedLighting.SendUniform("normalMap", 1);
-	DefferedLighting.SendUniform("positionMap", 2);
+	LightPassShader.SendUniform("albedoMap", 0);
+	LightPassShader.SendUniform("normalMap", 1);
+	LightPassShader.SendUniform("positionMap", 2);
 
-	DefferedLighting.SendUniform("roughnessMap", 3);
-	DefferedLighting.SendUniform("metallicMap", 4);
-
-
-	DefferedLighting.SendUniform("aoMap", 5);
+	LightPassShader.SendUniform("roughnessMap", 3);
+	LightPassShader.SendUniform("metallicMap", 4);
 
 
-	DefferedLighting.SendUniform("camPos", m_Camera->GetPosition());
-	DefferedLighting.SendUniformArray("lightPositions", *m_PointLightPositions.data(), 4);
-	DefferedLighting.SendUniformArray("lightColors", *m_PointLightColors.data(), 4);
+	LightPassShader.SendUniform("aoMap", 5);
 
-	DefferedComposite.Bind();
+
+	LightPassShader.SendUniform("camPos", m_Camera->GetPosition());
+	LightPassShader.SendUniformArray("lightPositions", *m_PointLightPositions.data(), 4);
+	LightPassShader.SendUniformArray("lightColors", *m_PointLightColors.data(), 4);
+
+	LightpassBuffer.Bind();
 
 	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(0));
 	glActiveTexture(GL_TEXTURE1);
@@ -280,30 +294,33 @@ void Renderer::Render()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, GL_NONE);
 
-	DefferedComposite.UnBind();
-	DefferedLighting.UnBind();
+	LightpassBuffer.UnBind();
+	LightPassShader.UnBind();
 
 
 	//--------------------------------------------------------
 	//				IBL + Composite Lighting
+	//
+	// Combines The composite lighpass with the IBL 
+	// lighting + Gamma correction for the final image.
 	//--------------------------------------------------------
-	CombinedLighing.Bind();
-	LightingCombined.Bind();
+	CombinedLighingBuffer.Bind();
+	LightingCombinedShader.Bind();
 
-	DefferedLighting.SendUniform("albedoMap", 0);
-	DefferedLighting.SendUniform("normalMap", 1);
-	DefferedLighting.SendUniform("positionMap", 2);
+	LightingCombinedShader.SendUniform("albedoMap", 0);
+	LightingCombinedShader.SendUniform("normalMap", 1);
+	LightingCombinedShader.SendUniform("positionMap", 2);
 
-	DefferedLighting.SendUniform("roughnessMap", 3);
-	DefferedLighting.SendUniform("metallicMap", 4);
+	LightingCombinedShader.SendUniform("roughnessMap", 3);
+	LightingCombinedShader.SendUniform("metallicMap", 4);
 
-	DefferedLighting.SendUniform("irradianceMap", 5);
-	DefferedLighting.SendUniform("prefilterMap", 6);
-	DefferedLighting.SendUniform("brdfLUT", 7);
+	LightingCombinedShader.SendUniform("irradianceMap", 5);
+	LightingCombinedShader.SendUniform("prefilterMap", 6);
+	LightingCombinedShader.SendUniform("brdfLUT", 7);
 
-	DefferedLighting.SendUniform("aoMap", 8);
-	DefferedLighting.SendUniform("", 9);
-	DefferedLighting.SendUniform("camPos", m_Camera->GetPosition());
+	LightingCombinedShader.SendUniform("aoMap", 8);
+	LightingCombinedShader.SendUniform("combinedLights", 9);
+	LightingCombinedShader.SendUniform("camPos", m_Camera->GetPosition());
 
 
 	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(0));
@@ -324,7 +341,7 @@ void Renderer::Render()
 	glActiveTexture(GL_TEXTURE8);
 	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(5));
 	glActiveTexture(GL_TEXTURE9);
-	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(5));
+	glBindTexture(GL_TEXTURE_2D, LightpassBuffer.GetColorHandle(0));
 	DrawFullScreenQuad();
 	glBindTexture(GL_TEXTURE_2D, GL_NONE);
 	glActiveTexture(GL_TEXTURE8);
@@ -346,8 +363,10 @@ void Renderer::Render()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, GL_NONE);
 
+	LightingCombinedShader.UnBind();
+	CombinedLighingBuffer.UnBind();
 
-	DefferedComposite.MoveToBackBuffer(m_WindowWidth, m_WindowHeight);
+	CombinedLighingBuffer.MoveToBackBuffer(m_WindowWidth, m_WindowHeight);
 	glutSwapBuffers();
 	//------------------------------------------------------------------------------
 }

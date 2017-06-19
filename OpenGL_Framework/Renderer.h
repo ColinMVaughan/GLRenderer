@@ -103,8 +103,8 @@ private:
 	//Shaders used for rendering
 	ShaderProgram StaticGeometry;
 	ShaderProgram GBufferPass;
-	ShaderProgram DefferedLighting;
-	ShaderProgram LightingCombined;
+	ShaderProgram LightPassShader;
+	ShaderProgram LightingCombinedShader;
 	
 	//Environment maps
 	Texture m_CubeMap;

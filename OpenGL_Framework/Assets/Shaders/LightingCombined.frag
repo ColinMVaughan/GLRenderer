@@ -17,6 +17,7 @@ uniform samplerCube irradianceMap;
 uniform samplerCube prefilterMap;
 uniform sampler2D 	brdfLUT;
 
+uniform sampler2D combinedLights;
 
 const float PI = 3.14159265359;
 
@@ -83,7 +84,7 @@ void main()
 	
 	vec3 normal		   = texture(normalMap, texcoord).xyz;
 	vec3 position	   = texture(positionMap, texcoord).xyz;
-	vec3 CombinedLight = texture(CombinedLights, texcoord).rgb;
+	vec3 CombinedLight = texture(combinedLights, texcoord).rgb;
 	
 	//discard unnessisary fragmnets
 	if(length(position)==0)
