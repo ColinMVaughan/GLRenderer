@@ -62,4 +62,7 @@ private:
 
 	GMath::vec3f lightPos;
 	GMath::vec3f lightColor;
+
+	GMath::vec3f lightPos2;
+	GMath::vec3f lightColor2;
 };

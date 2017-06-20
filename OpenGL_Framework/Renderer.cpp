@@ -250,53 +250,61 @@ void Renderer::Render()
 	//--------------------------------------------------------
 	//			Deffered Lighting Pass
 	//--------------------------------------------------------
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+	LightpassBuffer.Clear();
+
 	glViewport(0, 0, m_WindowWidth, m_WindowHeight);
-	LightPassShader.Bind();
 
-	LightPassShader.SendUniform("albedoMap", 0);
-	LightPassShader.SendUniform("normalMap", 1);
-	LightPassShader.SendUniform("positionMap", 2);
+	for (int i = 0; i < m_PointLightPositions.size(); ++i)
+	{
+		LightPassShader.Bind();
 
-	LightPassShader.SendUniform("roughnessMap", 3);
-	LightPassShader.SendUniform("metallicMap", 4);
+		LightPassShader.SendUniform("albedoMap", 0);
+		LightPassShader.SendUniform("normalMap", 1);
+		LightPassShader.SendUniform("positionMap", 2);
 
-
-	LightPassShader.SendUniform("aoMap", 5);
-
-	LightPassShader.SendUniform("camPos", m_Camera->GetPosition());
-	LightPassShader.SendUniform("lightPosition", *m_PointLightPositions[0]);
-	LightPassShader.SendUniform("lightColor", *m_PointLightColors[0]);
-
-	LightpassBuffer.Bind();
-
-	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(0));
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(1));
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(2));
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(3));
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(4));
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(5));
-	DrawFullScreenQuad();
-	glBindTexture(GL_TEXTURE_CUBE_MAP, GL_NONE);
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, GL_NONE);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, GL_NONE);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, GL_NONE);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, GL_NONE);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, GL_NONE);
-
-	LightpassBuffer.UnBind();
-	LightPassShader.UnBind();
+		LightPassShader.SendUniform("roughnessMap", 3);
+		LightPassShader.SendUniform("metallicMap", 4);
 
 
+		LightPassShader.SendUniform("aoMap", 5);
+
+		LightPassShader.SendUniform("camPos", m_Camera->GetPosition());
+		LightPassShader.SendUniform("lightPosition", *m_PointLightPositions[i]);
+		LightPassShader.SendUniform("lightColor", *m_PointLightColors[i]);
+
+		LightpassBuffer.Bind();
+
+		glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(0));
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(1));
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(2));
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(3));
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(4));
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, GBuffer.GetColorHandle(5));
+		DrawFullScreenQuad();
+		glBindTexture(GL_TEXTURE_CUBE_MAP, GL_NONE);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, GL_NONE);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, GL_NONE);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, GL_NONE);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, GL_NONE);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, GL_NONE);
+
+		LightpassBuffer.UnBind();
+		LightPassShader.UnBind();
+	}
+
+	glDisable(GL_BLEND);
 	//--------------------------------------------------------
 	//				IBL + Composite Lighting
 	//
@@ -366,6 +374,7 @@ void Renderer::Render()
 	CombinedLighingBuffer.UnBind();
 
 	CombinedLighingBuffer.MoveToBackBuffer(m_WindowWidth, m_WindowHeight);
+	//LightpassBuffer.MoveToBackBuffer(m_WindowWidth, m_WindowHeight);
 	glutSwapBuffers();
 	//------------------------------------------------------------------------------
 }
