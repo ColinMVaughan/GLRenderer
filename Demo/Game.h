@@ -4,18 +4,13 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "ShaderProgram.h"
-#include "Mesh.h"
-#include "Texture.h"
-#include "FrameBuffer.h"
-#include "ParticleEffect.h"
+#include <Renderer\Renderer.h>
+
 
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
 
-#include "Timer.h"
-#include "Renderer.h"
 
 #define WINDOW_WIDTH		800
 #define WINDOW_HEIGHT		600

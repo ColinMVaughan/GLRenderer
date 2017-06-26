@@ -1,5 +1,6 @@
 #include "Game.h"
-#include "Utilities.h"
+#include <Renderer\Utilities.h>
+
 
 
 Game::Game()
