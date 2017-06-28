@@ -1,8 +1,6 @@
 #include "Game.h"
 #include <Renderer\Utilities.h>
 
-
-
 Game::Game()
 	: m_Renderer(WINDOW_HEIGHT, WINDOW_WIDTH, &m_Camera)
 {
