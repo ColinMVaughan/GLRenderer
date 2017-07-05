@@ -92,6 +92,7 @@
     <ClInclude Include="ParticleEffect.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture.h" />

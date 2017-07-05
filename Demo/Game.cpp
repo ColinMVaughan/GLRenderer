@@ -100,8 +100,9 @@ void Game::update()
 
 void Game::draw()
 {
-
-	m_Renderer.Render();
+	m_Renderer.PreRender();
+	m_Renderer.Render(&Orb, &m_Materials[0]);
+	m_Renderer.PostRender();
 	return;
 
 }

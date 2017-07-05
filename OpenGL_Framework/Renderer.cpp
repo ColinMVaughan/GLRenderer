@@ -159,14 +159,8 @@ void Renderer::AddDirectionalLight(GMath::vec3f lightColor, GMath::vec3f lightDi
 }
 
 
-
-//---------------------------------
-// Purpose: Renders the scene with the current list of renderables & default shaders
-//
-//---------------------------------
-void Renderer::Render()
+void Renderer::PreRender()
 {
-
 	//--------------------------------------------------------
 	//			Get Ready for Render
 	//--------------------------------------------------------
@@ -178,9 +172,7 @@ void Renderer::Render()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	GBuffer.Clear();
 
-	//-------------------------------------------------------------------------------
-	//			Render Geometry to GBuffer
-	//-------------------------------------------------------------------------------
+
 	glViewport(0, 0, m_WindowWidth, m_WindowHeight);
 
 	GBufferPass.Bind();
@@ -193,39 +185,51 @@ void Renderer::Render()
 	GBufferPass.SendUniform("Albedo", 2);
 	GBufferPass.SendUniform("Roughness", 1);
 	GBufferPass.SendUniform("Metallic", 0);
-
-
-	//Draw each mesh in Meshlist.
 	GBuffer.Bind();
-	for(int i = 0; i < MeshList.size(); ++i)
-	{
+}
+
+//---------------------------------
+// Purpose: Renders the scene with the current list of renderables & default shaders
+//
+//---------------------------------
+inline void Renderer::Render(Mesh* mesh, Material* material)
+{
+
+	//-------------------------------------------------------------------------------
+	//			Render Geometry to GBuffer
+	//-------------------------------------------------------------------------------
+	//Draw each mesh in Meshlist.
 
 		glActiveTexture(GL_TEXTURE0);
-		MaterialList[i]->Metallic.Bind();
+		material->Metallic.Bind();
 		glActiveTexture(GL_TEXTURE1);
-		MaterialList[i]->Roughness.Bind();
+		material->Roughness.Bind();
 		glActiveTexture(GL_TEXTURE2);
-		MaterialList[i]->Albedo.Bind();
+		material->Albedo.Bind();
 		glActiveTexture(GL_TEXTURE3);
-		MaterialList[i]->Normal.Bind();
+		material->Normal.Bind();
 		glActiveTexture(GL_TEXTURE4);
-		MaterialList[i]->AO.Bind();
+		material->AO.Bind();
 
-		glBindVertexArray(MeshList[i]->VAO);
-		glDrawArrays(GL_TRIANGLES, 0, MeshList[i]->GetNumVertices());
+		glBindVertexArray(mesh->VAO);
+		glDrawArrays(GL_TRIANGLES, 0, mesh->GetNumVertices());
 		glBindVertexArray(0);
 
-		MaterialList[i]->AO.UnBind();
+		material->AO.UnBind();
 		glActiveTexture(GL_TEXTURE3);
-		MaterialList[i]->Normal.UnBind();
+		material->Normal.UnBind();
 		glActiveTexture(GL_TEXTURE2);
-		MaterialList[i]->Albedo.UnBind();
+		material->Albedo.UnBind();
 		glActiveTexture(GL_TEXTURE1);
-		MaterialList[i]->Roughness.UnBind();
+		material->Roughness.UnBind();
 		glActiveTexture(GL_TEXTURE0);
-		MaterialList[i]->Metallic.UnBind();
-	}
+		material->Metallic.UnBind();
+	
+}
 
+
+void Renderer::PostRender()
+{
 	GBufferPass.UnBind();
 	GBuffer.UnBind();
 

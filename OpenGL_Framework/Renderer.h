@@ -71,7 +71,11 @@ public:
 	void AddMesh(Mesh* mesh, Material* material);
 	void AddPointLight(GMath::vec3f* lightColor, GMath::vec3f* lightpPsition, bool castsShadows);
 	void AddDirectionalLight(GMath::vec3f lightColor, GMath::vec3f lightDirection, bool castsShadows);
-	void Render();
+	
+
+	void PreRender();
+	inline void Render(Mesh* mesh, Material* material);
+	void PostRender();
 
 private:
 	void InitalizeDefaultMaterial();
